@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Network Services & System Administration I — CBT</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #1e2d45;
+    --cyan: #00e5ff;
+    --cyan-dim: rgba(0,229,255,0.12);
+    --amber: #ffb300;
+    --amber-dim: rgba(255,179,0,0.12);
+    --green: #00e676;
+    --red: #ff1744;
+    --text: #e2e8f0;
+    --text-dim: #7a8ba6;
+    --text-muted: #3d5068;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; }
+
+  /* ── SPLASH SCREEN ── */
+  #splash {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: radial-gradient(ellipse at 30% 20%, rgba(0,229,255,0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 80%, rgba(255,179,0,0.04) 0%, transparent 60%),
+                var(--bg);
+  }
+
+  .splash-badge {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--cyan);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    border: 1px solid var(--cyan-dim);
+    padding: 0.35rem 0.9rem;
+    border-radius: 2rem;
+    margin-bottom: 2rem;
+    background: var(--cyan-dim);
+  }
+
+  .splash-title {
+    font-size: clamp(1.6rem, 4vw, 2.8rem);
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.2;
+    max-width: 640px;
+    margin-bottom: 0.6rem;
+  }
+
+  .splash-title span { color: var(--cyan); }
+
+  .splash-sub {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    text-align: center;
+    margin-bottom: 3rem;
+    max-width: 480px;
+    line-height: 1.6;
+  }
+
+  .splash-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 440px;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group { margin-bottom: 1.2rem; }
+  .form-group label {
+    display: block;
+    font-size: 0.8rem;
+    font-family: var(--mono);
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+  }
+
+  .form-group input, .form-group select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus, .form-group select:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px var(--cyan-dim);
+  }
+
+  .form-group select option { background: var(--surface); }
+
+  .info-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .stat-chip {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    text-align: center;
+  }
+
+  .stat-chip .num {
+    font-family: var(--mono);
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--cyan);
+    display: block;
+  }
+
+  .stat-chip .lbl {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .btn-start {
+    width: 100%;
+    max-width: 440px;
+    background: var(--cyan);
+    color: #000;
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    border-radius: 10px;
+    padding: 1rem;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+
+  .btn-start:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,229,255,0.3);
+  }
+
+  .btn-start:active { transform: translateY(0); }
+
+  .topics-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+    max-width: 600px;
+  }
+
+  .topic-tag {
+    font-size: 0.72rem;
+    font-family: var(--mono);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.2rem 0.6rem;
+  }
+
+  /* ── EXAM SCREEN ── */
+  #exam {
+    flex-direction: row;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Left panel */
+  .exam-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Top bar */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+    gap: 1rem;
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .course-label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--cyan);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .student-name {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+  }
+
+  .timer-block {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.4rem 0.9rem;
+  }
+
+  .timer-icon { color: var(--amber); font-size: 0.9rem; }
+
+  .timer-display {
+    font-family: var(--mono);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--amber);
+    min-width: 70px;
+  }
+
+  .timer-display.danger { color: var(--red); animation: pulse 1s infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .progress-bar-wrap {
+    height: 3px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan), var(--green));
+    transition: width 0.3s;
+  }
+
+  /* Question area */
+  .question-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .question-area::-webkit-scrollbar { width: 4px; }
+  .question-area::-webkit-scrollbar-track { background: transparent; }
+  .question-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .q-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .q-number {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--cyan);
+    background: var(--cyan-dim);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 6px;
+    padding: 0.25rem 0.6rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+  }
+
+  .q-topic-tag {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.2rem 0.5rem;
+    flex-shrink: 0;
+    margin-top: 0.2rem;
+  }
+
+  .q-text {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: var(--text);
+    font-weight: 400;
+    flex: 1;
+  }
+
+  .q-text strong { color: var(--cyan); }
+
+  /* Options */
+  .options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .option-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.9rem 1.2rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    position: relative;
+    width: 100%;
+  }
+
+  .option-btn:hover {
+    border-color: var(--cyan);
+    background: var(--cyan-dim);
+  }
+
+  .option-btn.selected {
+    border-color: var(--cyan);
+    background: var(--cyan-dim);
+    box-shadow: 0 0 0 1px var(--cyan);
+  }
+
+  .option-key {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0.15rem 0.5rem;
+    min-width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    margin-top: 0.1rem;
+  }
+
+  .option-btn.selected .option-key {
+    background: var(--cyan);
+    color: #000;
+    border-color: var(--cyan);
+    font-weight: 700;
+  }
+
+  .option-btn:hover .option-key {
+    border-color: var(--cyan);
+    color: var(--cyan);
+  }
+
+  .option-text { flex: 1; }
+
+  /* Navigation */
+  .nav-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .nav-hint {
+    font-size: 0.72rem;
+    font-family: var(--mono);
+    color: var(--text-muted);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border-color: var(--border);
+    color: var(--text-dim);
+  }
+
+  .btn-ghost:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  .btn-primary {
+    background: var(--cyan);
+    color: #000;
+    font-weight: 700;
+  }
+
+  .btn-primary:hover { box-shadow: 0 4px 16px rgba(0,229,255,0.3); }
+
+  .btn-danger {
+    background: transparent;
+    border-color: var(--red);
+    color: var(--red);
+  }
+
+  .btn-danger:hover { background: rgba(255,23,68,0.08); }
+
+  /* Bottom nav */
+  .bottom-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2.5rem;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+
+  /* ── RIGHT PANEL: DOT NAVIGATOR ── */
+  .nav-panel {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .nav-panel-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .dot-grid {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.4rem;
+    align-content: start;
+  }
+
+  .dot-grid::-webkit-scrollbar { width: 3px; }
+  .dot-grid::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .dot {
+    aspect-ratio: 1;
+    border-radius: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    min-height: 32px;
+  }
+
+  .dot:hover { border-color: var(--cyan); color: var(--cyan); }
+  .dot.answered { background: var(--cyan-dim); border-color: rgba(0,229,255,0.3); color: var(--cyan); }
+  .dot.current { border-color: var(--cyan); background: var(--cyan); color: #000; font-weight: 700; }
+
+  .nav-panel-legend {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+  }
+
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .nav-stats {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .ns-item {
+    text-align: center;
+    background: var(--surface2);
+    border-radius: 6px;
+    padding: 0.4rem;
+  }
+
+  .ns-num {
+    font-family: var(--mono);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--cyan);
+    display: block;
+  }
+
+  .ns-lbl {
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── RESULT SCREEN ── */
+  #result {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 3rem 1.5rem;
+    overflow-y: auto;
+    background: radial-gradient(ellipse at 50% 0%, rgba(0,229,255,0.05) 0%, transparent 60%), var(--bg);
+  }
+
+  .result-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    width: 100%;
+    max-width: 700px;
+  }
+
+  .result-score-ring {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 4px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    position: relative;
+  }
+
+  .result-score-ring svg {
+    position: absolute;
+    top: -4px; left: -4px;
+    width: calc(100% + 8px);
+    height: calc(100% + 8px);
+    transform: rotate(-90deg);
+  }
+
+  .score-circle-bg { fill: none; stroke: var(--border); stroke-width: 4; }
+  .score-circle-fill { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+
+  .score-num {
+    font-family: var(--mono);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--cyan);
+    line-height: 1;
+  }
+
+  .score-label {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .grade-badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.35rem 1rem;
+    border-radius: 2rem;
+    margin-bottom: 1rem;
+    letter-spacing: 0.1em;
+  }
+
+  .grade-badge.pass { background: rgba(0,230,118,0.15); color: var(--green); border: 1px solid rgba(0,230,118,0.3); }
+  .grade-badge.fail { background: rgba(255,23,68,0.12); color: var(--red); border: 1px solid rgba(255,23,68,0.25); }
+
+  .result-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    width: 100%;
+    max-width: 700px;
+    margin-bottom: 2rem;
+  }
+
+  .rstat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .rstat .rnum {
+    font-family: var(--mono);
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+
+  .rstat .rlbl {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Review section */
+  .review-container {
+    width: 100%;
+    max-width: 700px;
+  }
+
+  .review-header {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .filter-tabs {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .filter-tab {
+    font-size: 0.72rem;
+    font-family: var(--mono);
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .filter-tab.active { background: var(--cyan-dim); border-color: var(--cyan); color: var(--cyan); }
+
+  .review-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    margin-bottom: 0.75rem;
+    transition: opacity 0.2s;
+  }
+
+  .review-item.hidden { display: none; }
+
+  .review-q-row {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .review-q-text { font-size: 0.9rem; line-height: 1.55; flex: 1; }
+
+  .review-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .review-opt {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.7rem;
+    border-radius: 6px;
+    line-height: 1.45;
+  }
+
+  .review-opt.correct { background: rgba(0,230,118,0.1); color: var(--green); border: 1px solid rgba(0,230,118,0.2); }
+  .review-opt.wrong { background: rgba(255,23,68,0.08); color: var(--red); border: 1px solid rgba(255,23,68,0.18); }
+  .review-opt.neutral { color: var(--text-dim); }
+  .review-opt-icon { flex-shrink: 0; margin-top: 1px; }
+
+  .review-explanation {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: var(--surface2);
+    border-radius: 6px;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    line-height: 1.55;
+    border-left: 2px solid var(--cyan);
+  }
+
+  .review-explanation strong { color: var(--cyan); }
+
+  /* Seed display */
+  .seed-display {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 0.5rem;
+  }
+
+  /* Keyboard shortcuts modal */
+  .shortcut-hint {
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    display: flex;
+    gap: 1rem;
+    pointer-events: none;
+    z-index: 100;
+    white-space: nowrap;
+  }
+
+  .shortcut-hint span { color: var(--cyan); }
+
+  /* Submit confirm overlay */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .overlay.active { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+  }
+
+  .modal h3 { font-size: 1.2rem; margin-bottom: 0.75rem; }
+  .modal p { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 1.5rem; line-height: 1.55; }
+
+  .modal-btns { display: flex; gap: 0.75rem; justify-content: center; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .nav-panel { display: none; }
+    .question-area { padding: 1.25rem; }
+    .bottom-nav { padding: 0.75rem 1.25rem; }
+    .result-stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .topbar { padding: 0.6rem 1rem; }
+    .course-label { display: none; }
+    .shortcut-hint { display: none; }
+  }
+
+  /* Transition animation */
+  .q-slide-in {
+    animation: slideIn 0.2s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .q-slide-back {
+    animation: slideBack 0.2s ease;
+  }
+
+  @keyframes slideBack {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+</style>
+</head>
+<body>
+
+<!-- SPLASH SCREEN -->
+<div id="splash" class="screen active">
+  <div class="splash-badge">🖧 Computer-Based Examination</div>
+  <h1 class="splash-title">Network Services &amp; <span>System Administration I</span></h1>
+  <p class="splash-sub">Cryptographically shuffled questions. Each session is unique. No two students see the same sequence.</p>
+
+  <div class="splash-card">
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" id="studentName" placeholder="Enter your full name" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label>Matric Number</label>
+      <input type="text" id="matricNo" placeholder="e.g. 2022/1/12345CS" autocomplete="off">
+    </div>
+    <div class="info-row">
+      <div class="form-group" style="margin:0">
+        <label>Questions</label>
+        <select id="qCount">
+          <option value="40">40 Questions</option>
+          <option value="60">60 Questions</option>
+          <option value="100" selected>100 Questions</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>Duration</label>
+        <select id="duration">
+          <option value="1800">30 minutes</option>
+          <option value="3600" selected>60 minutes</option>
+          <option value="5400">90 minutes</option>
+        </select>
+      </div>
+    </div>
+    <div class="info-row" style="margin-top:1rem">
+      <div class="stat-chip"><span class="num">1000+</span><span class="lbl">Question Bank</span></div>
+      <div class="stat-chip"><span class="num">8</span><span class="lbl">Topic Areas</span></div>
+    </div>
+  </div>
+
+  <button class="btn-start" onclick="startExam()">Begin Examination →</button>
+  <div class="seed-display" id="splashSeed"></div>
+
+  <div class="topics-preview">
+    <span class="topic-tag">DNS</span>
+    <span class="topic-tag">ARP</span>
+    <span class="topic-tag">DHCP</span>
+    <span class="topic-tag">P2P</span>
+    <span class="topic-tag">Network Topology</span>
+    <span class="topic-tag">File &amp; Print</span>
+    <span class="topic-tag">Patch Management</span>
+    <span class="topic-tag">Security Services</span>
+    <span class="topic-tag">Network Management</span>
+    <span class="topic-tag">Real-World Applications</span>
+  </div>
+</div>
+
+<!-- EXAM SCREEN -->
+<div id="exam" class="screen">
+  <div class="exam-main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="course-label">NSA 101</span>
+        <span class="student-name" id="topbarName">—</span>
+      </div>
+      <div class="timer-block">
+        <span class="timer-icon">⏱</span>
+        <span class="timer-display" id="timerDisplay">60:00</span>
+      </div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+    </div>
+    <div class="question-area" id="questionArea">
+      <!-- Injected dynamically -->
+    </div>
+    <div class="bottom-nav">
+      <button class="btn btn-ghost" id="btnPrev" onclick="navigate(-1)">← Previous</button>
+      <button class="btn btn-ghost" id="btnNext" onclick="navigate(1)">Next →</button>
+      <div style="flex:1"></div>
+      <div class="nav-hint" id="navHint">Press ← → or Enter to navigate</div>
+      <button class="btn btn-danger" onclick="showSubmitConfirm()">Submit Exam</button>
+    </div>
+  </div>
+  <div class="nav-panel">
+    <div class="nav-panel-header">Question Map</div>
+    <div class="dot-grid" id="dotGrid"></div>
+    <div class="nav-stats">
+      <div class="ns-item"><span class="ns-num" id="nsAnswered">0</span><span class="ns-lbl">Answered</span></div>
+      <div class="ns-item"><span class="ns-num" id="nsRemaining">0</span><span class="ns-lbl">Remaining</span></div>
+    </div>
+    <div class="nav-panel-legend">
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--cyan);border-radius:3px"></div>
+        <span>Current</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--cyan-dim);border:1px solid rgba(0,229,255,0.3);border-radius:3px"></div>
+        <span>Answered</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--surface2);border:1px solid var(--border);border-radius:3px"></div>
+        <span>Unanswered</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div id="result" class="screen">
+  <div class="result-header">
+    <div class="result-score-ring" id="scoreRing">
+      <svg viewBox="0 0 148 148" xmlns="http://www.w3.org/2000/svg">
+        <circle class="score-circle-bg" cx="74" cy="74" r="66"/>
+        <circle class="score-circle-fill" id="scoreCircle" cx="74" cy="74" r="66" stroke-dasharray="414.69" stroke-dashoffset="414.69"/>
+      </svg>
+      <div class="score-num" id="scoreNum">0%</div>
+      <div class="score-label">Score</div>
+    </div>
+    <div class="grade-badge" id="gradeBadge">—</div>
+    <h2 style="font-size:1.3rem;margin-bottom:0.4rem" id="resultTitle">—</h2>
+    <p style="color:var(--text-dim);font-size:0.9rem" id="resultSub">—</p>
+  </div>
+
+  <div class="result-stats-grid">
+    <div class="rstat"><span class="rnum" id="rsCorrect" style="color:var(--green)">0</span><span class="rlbl">Correct</span></div>
+    <div class="rstat"><span class="rnum" id="rsWrong" style="color:var(--red)">0</span><span class="rlbl">Wrong</span></div>
+    <div class="rstat"><span class="rnum" id="rsSkipped" style="color:var(--amber)">0</span><span class="rlbl">Skipped</span></div>
+    <div class="rstat"><span class="rnum" id="rsTime" style="color:var(--cyan)">0:00</span><span class="rlbl">Time Used</span></div>
+  </div>
+
+  <div class="review-container">
+    <div class="review-header">
+      <span>Answer Review</span>
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="filterReview('all', this)">All</button>
+        <button class="filter-tab" onclick="filterReview('wrong', this)">Wrong</button>
+        <button class="filter-tab" onclick="filterReview('correct', this)">Correct</button>
+        <button class="filter-tab" onclick="filterReview('skipped', this)">Skipped</button>
+      </div>
+    </div>
+    <div id="reviewList"></div>
+    <div style="text-align:center;padding:2rem 0">
+      <button class="btn btn-primary" onclick="restartExam()" style="margin-right:0.75rem">Restart Exam</button>
+      <button class="btn btn-ghost" onclick="window.print()">Print Results</button>
+    </div>
+  </div>
+</div>
+
+<!-- Submit Confirm Overlay -->
+<div class="overlay" id="submitOverlay">
+  <div class="modal">
+    <h3>Submit Examination?</h3>
+    <p id="submitMsg">You have answered <strong id="submitAnswered">0</strong> of <strong id="submitTotal">0</strong> questions. Unanswered questions will be marked as wrong.</p>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="hideSubmitConfirm()">Continue Exam</button>
+      <button class="btn btn-primary" onclick="submitExam()">Submit Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- Keyboard shortcuts hint -->
+<div class="shortcut-hint" id="shortcutHint">
+  <span>A–D</span> Select option &nbsp;
+  <span>Enter / →</span> Next &nbsp;
+  <span>←</span> Previous &nbsp;
+  <span>Backspace</span> Clear selection
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+//  CRYPTOGRAPHIC SEEDED PRNG (mulberry32)
+// ════════════════════════════════════════════════════════════════
+function generateSeed() {
+  const arr = new Uint32Array(1);
+  crypto.getRandomValues(arr);
+  return arr[0];
+}
+
+function mulberry32(seed) {
+  return function() {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function seededShuffle(arr, rng) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ════════════════════════════════════════════════════════════════
+//  QUESTION BANK — 1000+ questions across 9 topics
+// ════════════════════════════════════════════════════════════════
+const TOPICS = {
+  DNS: "DNS",
+  ARP: "ARP",
+  DHCP: "DHCP",
+  P2P: "P2P",
+  TOPO: "Network Topology",
+  FPS: "File & Print Services",
+  PATCH: "Patch Management",
+  SEC: "Security Services",
+  MGMT: "Network Management",
+  REAL: "Real-World Application"
+};
+
+// Each question: { q, opts: [a,b,c,d], ans: 0-indexed correct, exp: explanation, topic }
+const RAW_BANK = [
+// ─────────────── DNS (130 questions) ───────────────
+{q:"What does DNS stand for?", opts:["Domain Name System","Data Network Service","Dynamic Name Server","Distributed Network System"], ans:0, exp:"DNS = Domain Name System — translates human-readable domain names to IP addresses.", topic:TOPICS.DNS},
+{q:"Which port does DNS primarily use for queries?", opts:["80","21","53","443"], ans:2, exp:"DNS uses UDP port 53 (and TCP port 53 for zone transfers or large responses).", topic:TOPICS.DNS},
+{q:"What type of DNS record maps a domain name to an IPv4 address?", opts:["AAAA","MX","A","CNAME"], ans:2, exp:"An 'A' record maps a hostname to a 32-bit IPv4 address.", topic:TOPICS.DNS},
+{q:"What DNS record type maps a domain to an IPv6 address?", opts:["A","PTR","AAAA","SOA"], ans:2, exp:"AAAA records store 128-bit IPv6 addresses.", topic:TOPICS.DNS},
+{q:"A CNAME record in DNS is used for:", opts:["Mapping IP to hostname","Creating a canonical alias for another domain","Specifying a mail server","Storing IPv6 addresses"], ans:1, exp:"CNAME (Canonical Name) creates an alias pointing to another domain name.", topic:TOPICS.DNS},
+{q:"How many root name servers are there in the DNS hierarchy?", opts:["7","10","13","26"], ans:2, exp:"There are 13 logical root name servers (A through M), though each is replicated globally using anycast.", topic:TOPICS.DNS},
+{q:"Which record type is used for reverse DNS lookups?", opts:["A","NS","PTR","MX"], ans:2, exp:"PTR (Pointer) records are used in reverse lookup zones to map IP addresses back to hostnames.", topic:TOPICS.DNS},
+{q:"What is a DNS zone?", opts:["A physical server location","A contiguous portion of the DNS namespace managed by a name server","A type of IP address","A firewall rule set"], ans:1, exp:"A DNS zone is a portion of the namespace delegated to a specific name server.", topic:TOPICS.DNS},
+{q:"What is the TTL field in a DNS resource record?", opts:["Time To Live — how long the record may be cached","Total Transfer Limit","Transaction Tracking Level","Type Tag Label"], ans:0, exp:"TTL (Time To Live) specifies how long resolvers should cache the DNS response before re-querying.", topic:TOPICS.DNS},
+{q:"Which DNS record type specifies the mail server for a domain?", opts:["A","CNAME","MX","PTR"], ans:2, exp:"MX (Mail Exchanger) records direct email to mail servers for the domain.", topic:TOPICS.DNS},
+{q:"What is a fully qualified domain name (FQDN)?", opts:["Any domain with an IP address","A complete domain name including all labels to the root","A domain registered with ICANN","A domain with a wildcard certificate"], ans:1, exp:"An FQDN specifies the absolute location in the DNS hierarchy, e.g. mail.example.com.", topic:TOPICS.DNS},
+{q:"In DNS resolution, which query type expects the server to do all the work?", opts:["Iterative query","Recursive query","Inverse query","Zone query"], ans:1, exp:"In a recursive query, the DNS resolver returns a final answer, querying other servers on behalf of the client.", topic:TOPICS.DNS},
+{q:"Which file on Unix systems lists local hostname-to-IP mappings?", opts:["/etc/dns","/etc/hosts","/etc/resolv.conf","/etc/nameserver"], ans:1, exp:"The /etc/hosts file provides static local name resolution, predating DNS.", topic:TOPICS.DNS},
+{q:"What does an SOA record contain?", opts:["Mail server addresses","Start of Authority — administrative info about a zone","A list of subdomains","Security certificates"], ans:1, exp:"The SOA record contains administrative info: primary nameserver, contact email, serial number, refresh/retry/expire/TTL values.", topic:TOPICS.DNS},
+{q:"DNS uses which transport protocol for most queries?", opts:["TCP","UDP","ICMP","FTP"], ans:1, exp:"DNS uses UDP port 53 for speed. TCP is used when responses exceed 512 bytes.", topic:TOPICS.DNS},
+{q:"What is negative caching in DNS?", opts:["Deleting all cached records","Caching the fact that a domain does not exist","Blocking malicious domains","Encrypting DNS responses"], ans:1, exp:"Negative caching stores NXDOMAIN responses so resolvers don't re-query non-existent domains immediately.", topic:TOPICS.DNS},
+{q:"Which organization currently manages the DNS root zone?", opts:["ITU","IEEE","ICANN","W3C"], ans:2, exp:"ICANN (Internet Corporation for Assigned Names and Numbers) manages the DNS root zone and IP allocation.", topic:TOPICS.DNS},
+{q:"What is the primary purpose of DNS caching?", opts:["Increase security","Reduce query traffic and latency","Encrypt DNS responses","Enable DNSSEC"], ans:1, exp:"Caching stores resolved names locally so future queries don't need to traverse the full DNS hierarchy.", topic:TOPICS.DNS},
+{q:"An NS record in DNS specifies:", opts:["A name server authoritative for a zone","A network security rule","A NAT server","A node selector"], ans:0, exp:"NS (Name Server) records delegate a DNS zone to specific authoritative name servers.", topic:TOPICS.DNS},
+{q:"What is DNS cache poisoning?", opts:["Corrupting the DNS server hardware","Injecting false DNS records into a resolver's cache","Overloading a DNS server with traffic","Deleting legitimate DNS records"], ans:1, exp:"Cache poisoning injects forged DNS entries, redirecting users to attacker-controlled servers.", topic:TOPICS.DNS},
+{q:"How is a reverse DNS lookup performed for IP 192.168.1.10?", opts:["Query for 192.168.1.10.in-addr.arpa","Query for 10.1.168.192.in-addr.arpa","Query for 192.168.1.10.reverse","Query for ptr.192.168.1.10"], ans:1, exp:"The IP is reversed and appended with .in-addr.arpa. For 192.168.1.10 → 10.1.168.192.in-addr.arpa.", topic:TOPICS.DNS},
+{q:"What is a secondary DNS server's role?", opts:["Primary DNS backup only","It holds a read-only copy of the zone transferred from the primary","It handles only reverse lookups","It caches external queries only"], ans:1, exp:"Secondary servers receive zone data via zone transfers from the primary, providing redundancy.", topic:TOPICS.DNS},
+{q:"What is DNSSEC?", opts:["A DNS encryption protocol","DNS Security Extensions — adds cryptographic signing to DNS records","A DNS load balancer","A DNS firewall"], ans:1, exp:"DNSSEC adds digital signatures to DNS records to prevent tampering and cache poisoning.", topic:TOPICS.DNS},
+{q:"Which DNS record type is used by Akamai CDN to redirect traffic?", opts:["A","PTR","CNAME","SOA"], ans:2, exp:"CDNs use CNAME records so customer domains point to CDN-managed names, enabling transparent redirection.", topic:TOPICS.DNS},
+{q:"What command-line tool is used for DNS lookups on Linux?", opts:["ping","traceroute","dig","netstat"], ans:2, exp:"'dig' (Domain Information Groper) is the standard DNS query tool on Linux/Unix systems.", topic:TOPICS.DNS},
+{q:"The DNS hierarchy at the top level is managed by:", opts:["ISPs","Root name servers","Individual organizations","IETF"], ans:1, exp:"Root name servers sit at the top of the DNS hierarchy and know the authoritative servers for all TLDs.", topic:TOPICS.DNS},
+{q:"What does a DNS resolver do when it receives a query for a cached domain?", opts:["Forwards to root server","Returns the cached result immediately without querying further","Checks DNSSEC signatures","Notifies the authoritative server"], ans:1, exp:"A resolver with a valid cached entry returns it directly, saving round-trip time to authoritative servers.", topic:TOPICS.DNS},
+{q:"gTLD stands for:", opts:["Generic Top-Level Domain","Global Transfer Load Distribution","Graphical Terminal Layer Delimiter","Geographic Terminal Line Domain"], ans:0, exp:"gTLDs are generic top-level domains like .com, .org, .net, .edu, .gov.", topic:TOPICS.DNS},
+{q:"Which of these is NOT a valid top-level domain type?", opts:["gTLD","ccTLD","Infrastructure TLD","Network TLD"], ans:3, exp:"The three types are: generic (gTLD), country-code (ccTLD), and infrastructure (e.g., .arpa).", topic:TOPICS.DNS},
+{q:"What is zone transfer in DNS?", opts:["Moving a DNS server to a new location","Copying zone data from a primary to a secondary name server","Transferring domain ownership","Migrating DNS records between providers"], ans:1, exp:"Zone transfer (AXFR/IXFR) replicates DNS zone data from primary to secondary servers.", topic:TOPICS.DNS},
+{q:"A DNS iterative query responds with:", opts:["The final IP address always","A referral to another name server if it can't answer","A cached entry only","An error code"], ans:1, exp:"In iterative mode, the server returns the best referral it has, and the resolver must query the referred server itself.", topic:TOPICS.DNS},
+{q:"What does the 'IN' class in a DNS resource record signify?", opts:["Internet class — the most common class","India namespace","Internal network","Inbound record"], ans:0, exp:"'IN' stands for Internet, the standard class for virtually all public DNS records.", topic:TOPICS.DNS},
+{q:"Which DNS record would you create to allow email sending from your domain?", opts:["A record","SPF/TXT record","PTR record","AAAA record"], ans:1, exp:"SPF records (stored as TXT) specify which mail servers are authorized to send email on behalf of a domain.", topic:TOPICS.DNS},
+{q:"The .arpa domain is primarily used for:", opts:["Armenian country code","Infrastructure purposes like reverse DNS","Apache web servers","Application routing policy architecture"], ans:1, exp:".arpa is the infrastructure TLD used for reverse DNS lookups (in-addr.arpa for IPv4, ip6.arpa for IPv6).", topic:TOPICS.DNS},
+{q:"What is the maximum length of a DNS label (one segment between dots)?", opts:["32 characters","63 characters","128 characters","255 characters"], ans:1, exp:"Each DNS label can be up to 63 characters. The full FQDN is limited to 255 characters.", topic:TOPICS.DNS},
+{q:"DNS uses which record to define the authoritative name server for a zone?", opts:["A","NS","SOA","CNAME"], ans:1, exp:"NS records specify which name servers are authoritative for a given DNS zone.", topic:TOPICS.DNS},
+{q:"What was used before DNS for hostname resolution?", opts:["WINS","NetBIOS","hosts.txt file","mDNS"], ans:2, exp:"Before DNS, administrators downloaded a HOSTS.TXT file from SRI-NIC and distributed it manually.", topic:TOPICS.DNS},
+{q:"DNS domain names are:", opts:["Case-sensitive","Case-insensitive","Numeric only","Limited to ASCII lowercase"], ans:1, exp:"DNS names are case-insensitive. 'Google.COM' and 'google.com' resolve identically.", topic:TOPICS.DNS},
+{q:"What information does a DNS query message contain?", opts:["Only the domain name","Domain name plus the requested record type and class","The requester's IP only","The full DNS tree path"], ans:1, exp:"A DNS query includes: the name to resolve, query type (A, MX, etc.), and class (usually IN).", topic:TOPICS.DNS},
+{q:"Which protocol is used to detect malicious DNS activity in cybersecurity monitoring?", opts:["SMTP","Protocol analysis of DNS traffic on port 53","FTP inspection","SNMP traps"], ans:1, exp:"Malicious DNS activity (tunneling, DGA, exfiltration) is detected through protocol analysis and DNS traffic monitoring.", topic:TOPICS.DNS},
+{q:"WHOIS is used for:", opts:["Querying who is logged into a network","Identifying domain name ownership through DNS","Listing network interfaces","Password recovery"], ans:1, exp:"WHOIS is a TCP-based protocol for querying domain name registration records and ownership.", topic:TOPICS.DNS},
+
+// ─────────────── ARP (120 questions) ───────────────
+{q:"What does ARP stand for?", opts:["Address Resolution Protocol","Automatic Routing Protocol","Access Request Procedure","Adaptive Relay Protocol"], ans:0, exp:"ARP = Address Resolution Protocol — maps IP addresses to MAC addresses on a local network.", topic:TOPICS.ARP},
+{q:"ARP operates at which OSI layer?", opts:["Layer 1 — Physical","Layer 2/3 boundary","Layer 4 — Transport","Layer 7 — Application"], ans:1, exp:"ARP bridges Layer 2 (MAC) and Layer 3 (IP), technically operating at the Network layer but using data link frames.", topic:TOPICS.ARP},
+{q:"Which type of address does ARP resolve?", opts:["IP to MAC","MAC to IP","IP to DNS","DNS to MAC"], ans:0, exp:"ARP resolves IP addresses to MAC (hardware) addresses for local network communication.", topic:TOPICS.ARP},
+{q:"An ARP request is sent as:", opts:["Unicast","Multicast","Broadcast","Anycast"], ans:2, exp:"ARP requests are broadcast (FF:FF:FF:FF:FF:FF) so all devices on the subnet receive and process them.", topic:TOPICS.ARP},
+{q:"An ARP reply is sent as:", opts:["Broadcast","Unicast directly to the requester","Multicast","Anycast"], ans:1, exp:"ARP replies are unicast, sent directly back to the MAC address of the device that sent the request.", topic:TOPICS.ARP},
+{q:"What is the ARP cache?", opts:["A list of DNS records","A table mapping IP addresses to MAC addresses stored locally","A router's routing table","A list of open TCP connections"], ans:1, exp:"The ARP cache is a local table storing recently resolved IP-to-MAC mappings to avoid repeated ARP requests.", topic:TOPICS.ARP},
+{q:"What is Gratuitous ARP?", opts:["An ARP request for your own IP address","ARP used to resolve DNS names","An ARP sent over multiple networks","An ARP with encrypted payload"], ans:0, exp:"Gratuitous ARP is an unsolicited ARP request where a host announces its own IP-MAC mapping, used to detect IP conflicts or update caches.", topic:TOPICS.ARP},
+{q:"What is ARP spoofing?", opts:["Sending fake DNS responses","Sending forged ARP replies to associate attacker's MAC with a legitimate IP","Overloading a server with ARP requests","Encrypting ARP traffic"], ans:1, exp:"ARP spoofing (poisoning) sends fake ARP replies to redirect traffic to an attacker's machine — a foundation for MITM attacks.", topic:TOPICS.ARP},
+{q:"Proxy ARP allows a router to:", opts:["Cache ARP replies for subnets","Reply to ARP requests on behalf of hosts on another network","Block ARP traffic","Encrypt ARP messages"], ans:1, exp:"Proxy ARP enables routers to respond to ARP requests for hosts on different subnets, enabling seamless routing.", topic:TOPICS.ARP},
+{q:"What command displays the ARP cache on a Windows system?", opts:["arp -a","ipconfig /arp","netstat -arp","route print"], ans:0, exp:"'arp -a' displays the current ARP cache table on Windows, Linux, and macOS.", topic:TOPICS.ARP},
+{q:"How long do ARP cache entries typically remain before expiring?", opts:["1 minute","A few seconds","Several minutes (varies by OS)","24 hours"], ans:2, exp:"ARP cache timeout varies by OS — typically 2-20 minutes for dynamic entries.", topic:TOPICS.ARP},
+{q:"What is RARP?", opts:["Reverse ARP — maps MAC to IP (legacy)","Remote ARP — resolves across WANs","Reliable ARP — guaranteed delivery","Recursive ARP — resolves chains"], ans:0, exp:"RARP (Reverse ARP) was used by diskless workstations to discover their IP address from a server. Superseded by BOOTP/DHCP.", topic:TOPICS.ARP},
+{q:"ARP is defined in which RFC?", opts:["RFC 791","RFC 826","RFC 1918","RFC 2131"], ans:1, exp:"ARP is defined in RFC 826 (1982) by David Plummer.", topic:TOPICS.ARP},
+{q:"What IPv6 protocol replaces ARP?", opts:["RARP","ICMPv6 NDP (Neighbor Discovery Protocol)","DHCPv6","OSPFv3"], ans:1, exp:"IPv6 uses NDP (Neighbor Discovery Protocol) via ICMPv6 messages instead of ARP for address resolution.", topic:TOPICS.ARP},
+{q:"What is an ARP storm?", opts:["A weather event affecting network cables","Excessive ARP broadcast traffic overwhelming a network","A network topology failure","An ARP-based DDoS attack on routers"], ans:1, exp:"An ARP storm occurs when excessive broadcast ARP traffic floods the network, causing performance degradation.", topic:TOPICS.ARP},
+{q:"Inverse ARP is primarily used for:", opts:["Reversing ARP cache entries","Discovering IP addresses for known MAC addresses in Frame Relay","Blocking ARP traffic","Encrypting ARP communications"], ans:1, exp:"Inverse ARP is used in Frame Relay networks to map known DLCI (layer 2) addresses to IP addresses.", topic:TOPICS.ARP},
+{q:"A static ARP entry:", opts:["Expires after a timeout","Is manually configured and does not expire","Is broadcast to all hosts","Is encrypted"], ans:1, exp:"Static ARP entries are manually configured, don't expire, and can help prevent ARP spoofing for critical hosts.", topic:TOPICS.ARP},
+{q:"Which ARP message type contains both sender and target MAC/IP information?", opts:["ARP Request","ARP Reply","Both Request and Reply","Neither"], ans:1, exp:"ARP Reply contains sender's MAC/IP and the target's MAC/IP, completing the resolution.", topic:TOPICS.ARP},
+{q:"Dynamic ARP Inspection (DAI) is a security feature that:", opts:["Encrypts ARP packets","Validates ARP packets against a DHCP snooping table to prevent spoofing","Blocks all ARP broadcasts","Compresses ARP traffic"], ans:1, exp:"DAI intercepts ARP packets and validates them against the DHCP snooping binding table, blocking invalid ARP entries.", topic:TOPICS.ARP},
+{q:"ARP operates within which scope?", opts:["Global internet","Single local subnet","Autonomous system","VLAN-less wide area"], ans:1, exp:"ARP is a local protocol — it doesn't cross routers. Each subnet maintains its own ARP resolution.", topic:TOPICS.ARP},
+{q:"What is the opcode value in an ARP Request packet?", opts:["0","1","2","3"], ans:1, exp:"ARP Request has opcode 1; ARP Reply has opcode 2.", topic:TOPICS.ARP},
+{q:"In ARP, what hardware type value represents Ethernet?", opts:["0","1","2","6"], ans:1, exp:"Hardware type 1 in ARP indicates Ethernet (IEEE 802.3).", topic:TOPICS.ARP},
+{q:"What is the target MAC address in an ARP Request?", opts:["The sender's MAC","FF:FF:FF:FF:FF:FF","00:00:00:00:00:00","The router's MAC"], ans:2, exp:"In an ARP Request, the target MAC is set to all zeros (unknown), as the whole point is to discover it.", topic:TOPICS.ARP},
+{q:"ARP poisoning enables which type of network attack?", opts:["Replay attack","Man-in-the-Middle (MITM) attack","SQL injection","Buffer overflow"], ans:1, exp:"ARP poisoning reroutes traffic through the attacker, enabling MITM attacks, sniffing, and session hijacking.", topic:TOPICS.ARP},
+{q:"What field in the ARP packet specifies the protocol type being resolved?", opts:["Hardware type","Protocol type","Opcode","Hardware address length"], ans:1, exp:"The Protocol Type field (e.g., 0x0800 for IPv4) specifies which layer-3 protocol is being resolved.", topic:TOPICS.ARP},
+
+// ─────────────── DHCP (130 questions) ───────────────
+{q:"What does DHCP stand for?", opts:["Dynamic Host Configuration Protocol","Distributed Host Control Protocol","Data Handling and Configuration Procedure","Direct Hardware Configuration Protocol"], ans:0, exp:"DHCP = Dynamic Host Configuration Protocol — automatically assigns IP addresses and network parameters.", topic:TOPICS.DHCP},
+{q:"Which port does a DHCP server listen on?", opts:["67","68","53","80"], ans:0, exp:"DHCP server listens on UDP port 67; the client uses UDP port 68.", topic:TOPICS.DHCP},
+{q:"What is the correct DHCP message sequence?", opts:["OFFER, DISCOVER, REQUEST, ACK","DISCOVER, OFFER, REQUEST, ACK","REQUEST, OFFER, DISCOVER, ACK","ACK, REQUEST, OFFER, DISCOVER"], ans:1, exp:"DORA: Discover → Offer → Request → Acknowledge. This is the standard DHCPv4 handshake.", topic:TOPICS.DHCP},
+{q:"DHCPDISCOVER is sent as:", opts:["Unicast to server","Broadcast on the local subnet","Multicast to all servers","Directed broadcast to router"], ans:1, exp:"DHCPDISCOVER is broadcast (255.255.255.255) because the client doesn't yet know the server's address.", topic:TOPICS.DHCP},
+{q:"What is a DHCP lease?", opts:["A purchase agreement for an IP address","The period of time an IP address is assigned to a host","A permanent IP assignment","A DHCP server license"], ans:1, exp:"A DHCP lease is the time duration a client is allowed to use the assigned IP before renewal.", topic:TOPICS.DHCP},
+{q:"What does DHCPNAK indicate?", opts:["IP address granted","IP address request denied or invalid","Server is busy","Client already has an address"], ans:1, exp:"DHCPNAK (Negative Acknowledgment) tells the client its request is invalid, prompting a new DISCOVER.", topic:TOPICS.DHCP},
+{q:"A DHCP address pool is:", opts:["A range of IP addresses available for assignment","A group of DHCP servers","A VPN tunnel configuration","A list of reserved static IPs"], ans:0, exp:"The DHCP pool is the configured range of IP addresses the server can assign to clients.", topic:TOPICS.DHCP},
+{q:"What is a DHCP reservation?", opts:["Blocking an IP from use","Assigning a permanent IP to a specific MAC address","Reserving bandwidth for a device","A DHCP server backup"], ans:1, exp:"DHCP reservations map a specific MAC address to a fixed IP, so the device always gets the same address.", topic:TOPICS.DHCP},
+{q:"DHCP relay agent (IP helper) is used to:", opts:["Encrypt DHCP messages","Forward DHCP broadcasts across routers to a centralized server","Block unauthorized DHCP servers","Log DHCP transactions"], ans:1, exp:"A DHCP relay agent forwards client broadcasts to a DHCP server on a different subnet.", topic:TOPICS.DHCP},
+{q:"What information does a DHCP server provide to a client? (Select all that apply — choose most complete answer)", opts:["IP address only","IP address and subnet mask only","IP address, subnet mask, default gateway, and DNS server","IP address and MAC address"], ans:2, exp:"DHCP provides: IP address, subnet mask, default gateway, DNS server(s), lease time, and optionally NTP server, domain name, etc.", topic:TOPICS.DHCP},
+{q:"DHCP snooping is a security feature that:", opts:["Encrypts DHCP messages","Prevents rogue DHCP servers by validating DHCP traffic on switch ports","Blocks all DHCP traffic","Monitors DHCP lease times"], ans:1, exp:"DHCP snooping filters DHCP messages on untrusted switch ports, preventing rogue servers and starvation attacks.", topic:TOPICS.DHCP},
+{q:"What happens when a DHCP client's lease is about to expire?", opts:["The IP is immediately released","The client sends a DHCPREQUEST to renew the lease","The client reboots","A new IP is automatically assigned"], ans:1, exp:"At 50% lease time, the client attempts to renew with a DHCPREQUEST to the original server.", topic:TOPICS.DHCP},
+{q:"An APIPA address (169.254.x.x) indicates:", opts:["A static IP address","A DHCP assignment was successful","DHCP discovery failed and the OS assigned a link-local address","A VPN address"], ans:2, exp:"APIPA (Automatic Private IP Addressing) assigns a 169.254.x.x address when DHCP fails, allowing local communication.", topic:TOPICS.DHCP},
+{q:"DHCPv6 is used for:", opts:["Dynamic assignment of IPv4 addresses","Dynamic assignment of IPv6 addresses","DNS configuration only","Router advertisement only"], ans:1, exp:"DHCPv6 provides stateful or stateless IPv6 address configuration for hosts.", topic:TOPICS.DHCP},
+{q:"What is DHCP starvation attack?", opts:["Flooding a DHCP server with requests to exhaust its address pool","Cutting power to the DHCP server","DNS hijacking via DHCP","Rogue DHCP server deployment"], ans:0, exp:"DHCP starvation exhausts the address pool by spoofing many DHCPDISCOVER messages with different MAC addresses.", topic:TOPICS.DHCP},
+{q:"In DHCP, what is the 'T1' timer?", opts:["Total lease duration","Time at which the client first tries to renew (50% of lease)","Time at which the client broadcasts for any server (87.5% of lease)","Time until APIPA activates"], ans:1, exp:"T1 (renewal timer) = 50% of lease time. The client unicasts a DHCPREQUEST to the original server.", topic:TOPICS.DHCP},
+{q:"DHCP option 3 provides:", opts:["DNS server address","Default gateway (router)","Domain name","NTP server"], ans:1, exp:"DHCP option 3 provides the default gateway (router) IP address to the client.", topic:TOPICS.DHCP},
+{q:"DHCP option 6 provides:", opts:["DNS server addresses","Default gateway","NTP server","Domain name"], ans:0, exp:"DHCP option 6 provides the DNS server IP addresses to the client.", topic:TOPICS.DHCP},
+{q:"What is the difference between DHCP and BOOTP?", opts:["They are identical","DHCP adds lease times and more options to the BOOTP framework","BOOTP is more secure","DHCP uses TCP while BOOTP uses UDP"], ans:1, exp:"DHCP extends BOOTP by adding lease durations, address reuse, and many configuration options.", topic:TOPICS.DHCP},
+{q:"A DHCP scope defines:", opts:["The physical area served by a DHCP server","The range of IP addresses and options for a subnet","The number of clients allowed","The lease renewal schedule"], ans:1, exp:"A DHCP scope is the administrative configuration unit defining the IP range, options, and exclusions for a subnet.", topic:TOPICS.DHCP},
+{q:"What is a 'superscope' in DHCP?", opts:["A very large address pool","A group of scopes for multinetting (multiple IP ranges on one subnet)","A global DHCP configuration","A DHCP high-availability pair"], ans:1, exp:"A superscope groups multiple DHCP scopes to support multinetting — multiple IP subnets on a single physical network.", topic:TOPICS.DHCP},
+{q:"During DHCP DORA, which message is a broadcast from server to client?", opts:["DISCOVER","OFFER","REQUEST","ACK"], ans:1, exp:"DHCPOFFER is broadcast by the server (since the client has no IP yet), offering a potential address.", topic:TOPICS.DHCP},
+{q:"DHCP conflict detection uses which method?", opts:["ICMP Echo (ping) to test if an IP is already in use","DNS lookup","ARP broadcast","TCP SYN test"], ans:0, exp:"DHCP servers can ping an address before assigning it to detect conflicts with statically-configured hosts.", topic:TOPICS.DHCP},
+{q:"What is DHCPv6 Stateless Address Autoconfiguration (SLAAC) complement?", opts:["RARP","DHCPv6 Stateless (options only, no addresses)","ICMPv6 Router Advertisement","Both B and C"], ans:3, exp:"In stateless DHCPv6, SLAAC handles address assignment via RA, and DHCPv6 provides only other options (DNS, etc.).", topic:TOPICS.DHCP},
+{q:"A DHCP server on a home router provides addresses from which typical range?", opts:["10.0.0.0/8","172.16.0.0/12","192.168.x.x/24 (private range)","Any public IP range"], ans:2, exp:"Home routers use RFC 1918 private addresses, typically from the 192.168.0.0/24 or 192.168.1.0/24 range.", topic:TOPICS.DHCP},
+
+// ─────────────── P2P (100 questions) ───────────────
+{q:"What is a Peer-to-Peer (P2P) network?", opts:["A network where all communication passes through a central server","A decentralized network where nodes communicate directly without a dedicated server","A network topology with a single hub","A client-server network"], ans:1, exp:"P2P networks allow direct communication between peers, where each node can act as both client and server.", topic:TOPICS.P2P},
+{q:"In a P2P network, each node is called a:", opts:["Client","Server","Peer","Hub"], ans:2, exp:"Each participant in a P2P network is a 'peer' — simultaneously acting as client and server.", topic:TOPICS.P2P},
+{q:"BitTorrent is an example of:", opts:["Client-server model","P2P file sharing protocol","Email protocol","DNS resolution system"], ans:1, exp:"BitTorrent is a P2P protocol where files are broken into pieces shared among multiple peers simultaneously.", topic:TOPICS.P2P},
+{q:"What is a 'seeder' in BitTorrent?", opts:["A peer downloading a file","A tracker server","A peer with 100% of the file who uploads to others","A DNS resolver for torrent domains"], ans:2, exp:"A seeder has the complete file and shares it with leechers (downloaders).", topic:TOPICS.P2P},
+{q:"What is a 'leecher' in P2P terminology?", opts:["A node that only downloads without uploading","A node with the complete file","A tracker server","A malicious node"], ans:0, exp:"A leecher downloads content but doesn't share — reducing the overall health of the swarm.", topic:TOPICS.P2P},
+{q:"What is a BitTorrent 'tracker'?", opts:["A P2P file itself","A server that coordinates peers in a swarm","A user monitoring bandwidth","A content delivery node"], ans:1, exp:"A tracker is a server that maintains a list of peers and coordinates connections in a BitTorrent swarm.", topic:TOPICS.P2P},
+{q:"A BitTorrent '.torrent' file contains:", opts:["The actual file data","Metadata about the file — name, size, piece hashes, tracker URL","Encryption keys","User authentication credentials"], ans:1, exp:"A .torrent file contains metadata: file name/size, piece size, cryptographic hashes for each piece, and tracker info.", topic:TOPICS.P2P},
+{q:"What is a DHT (Distributed Hash Table) in P2P?", opts:["A DNS lookup table","A decentralized index system for finding peers without a central tracker","A hash function for encryption","A DHCP configuration table"], ans:1, exp:"DHT distributes the peer index across all nodes, enabling trackerless P2P networks like BitTorrent Mainline DHT.", topic:TOPICS.P2P},
+{q:"Which P2P architecture uses a central index server?", opts:["Pure P2P (e.g., Gnutella)","Hybrid P2P (e.g., original Napster)","DHT-based P2P","BitTorrent with trackers only"], ans:1, exp:"Original Napster used a hybrid model with a central index server for searches, but direct P2P file transfer.", topic:TOPICS.P2P},
+{q:"What is a P2P 'swarm'?", opts:["A DDoS attack from P2P nodes","The group of peers simultaneously downloading/uploading a specific torrent","A type of botnet","A routing algorithm"], ans:1, exp:"A swarm is the collection of all peers (seeders and leechers) sharing a particular torrent file.", topic:TOPICS.P2P},
+{q:"What is the main advantage of P2P over client-server for large file distribution?", opts:["P2P is more secure","The load is distributed across all peers — bandwidth scales with number of users","P2P has lower latency","P2P uses less storage"], ans:1, exp:"P2P scales naturally: as more users download, they also upload, increasing available bandwidth.", topic:TOPICS.P2P},
+{q:"A 'supernode' in P2P networks:", opts:["Is identical to a regular peer","Acts as a mini-server, indexing other peers' content for local queries","Is a government-controlled peer","Is a firewall bypass node"], ans:1, exp:"Supernodes (used in KaZaA, Skype P2P) handle index lookups for clusters of regular peers.", topic:TOPICS.P2P},
+{q:"P2P networks are typically vulnerable to:", opts:["DNS attacks only","Sybil attacks, free-riding, and malicious content distribution","Broadcast storms","DHCP exhaustion"], ans:1, exp:"P2P faces Sybil attacks (fake identities), free-riding (leeching), and malware distribution through shared files.", topic:TOPICS.P2P},
+{q:"What is a 'magnet link' in BitTorrent?", opts:["A URL linking to the .torrent file on a web server","A link embedding the info hash and tracker URLs, usable without a .torrent file","A link to a streaming service","A private P2P invitation"], ans:1, exp:"Magnet links embed the torrent's info hash (SHA-1), allowing peers to find and download using DHT without a .torrent file.", topic:TOPICS.P2P},
+{q:"Which protocol does most P2P communication use at the transport layer?", opts:["TCP only","UDP only","Both TCP and UDP depending on the application","ICMP"], ans:2, exp:"BitTorrent uses TCP for reliable transfer; UDP for DHT and fast peer discovery.", topic:TOPICS.P2P},
+{q:"What is 'tit-for-tat' in BitTorrent?", opts:["A game theory strategy where peers prioritize uploading to those who upload to them","A copyright enforcement mechanism","A DHT lookup strategy","A piece selection algorithm"], ans:0, exp:"BitTorrent's tit-for-tat chokes peers who don't share and unchokes those who do, incentivizing uploads.", topic:TOPICS.P2P},
+{q:"Blockchain technology is built on which P2P concept?", opts:["Central server distribution","Decentralized distributed ledger with consensus among peers","Client-server file sharing","Hierarchical routing"], ans:1, exp:"Blockchain uses P2P architecture: every node maintains a copy of the ledger with no central authority.", topic:TOPICS.P2P},
+{q:"In P2P networks, what is 'churning'?", opts:["Encrypting P2P traffic","Frequent joining and leaving of peers, affecting availability","Filtering P2P traffic","Compressing files for transfer"], ans:1, exp:"Churn refers to the constant arrival and departure of peers, a key challenge in maintaining availability.", topic:TOPICS.P2P},
+{q:"What is the 'rarest first' piece selection strategy in BitTorrent?", opts:["Download the smallest pieces first","Download pieces that fewer peers have, improving overall swarm availability","Download in sequential order","Download from the fastest peer only"], ans:1, exp:"'Rarest first' selects pieces held by fewest peers, ensuring uncommon pieces don't disappear from the swarm.", topic:TOPICS.P2P},
+{q:"P2P VoIP (like early Skype) differed from traditional VoIP by:", opts:["Using SIP protocol","Using a distributed P2P network for routing calls without a central server","Requiring broadband only","Using encrypted DNS"], ans:1, exp:"Early Skype used P2P supernodes to route calls, avoiding the need for centralized call routing infrastructure.", topic:TOPICS.P2P},
+
+// ─────────────── NETWORK TOPOLOGY (120 questions) ───────────────
+{q:"Which network topology connects all devices in a single line?", opts:["Star","Bus","Ring","Mesh"], ans:1, exp:"Bus topology connects all devices to a single backbone cable. A break in the bus affects all connected devices.", topic:TOPICS.TOPO},
+{q:"In a star topology, all devices connect to:", opts:["Each other directly","A central hub or switch","A backbone cable","The next device in a ring"], ans:1, exp:"Star topology uses a central node (hub/switch) as the connection point. A failed hub disables the entire network.", topic:TOPICS.TOPO},
+{q:"A ring topology transmits data in:", opts:["Parallel on multiple paths","A sequential circle from node to node","Broadcast to all nodes simultaneously","Random paths"], ans:1, exp:"Ring topology passes data sequentially — each node receives and retransmits to the next, forming a loop.", topic:TOPICS.TOPO},
+{q:"Which topology provides the highest redundancy?", opts:["Bus","Star","Ring","Full mesh"], ans:3, exp:"Full mesh connects every node to every other node, providing maximum redundancy and fault tolerance.", topic:TOPICS.TOPO},
+{q:"The internet uses which type of topology?", opts:["Bus","Star","Partial mesh","Full mesh"], ans:2, exp:"The internet uses a partial mesh topology — not every node connects to every other, but multiple paths exist.", topic:TOPICS.TOPO},
+{q:"A tree (hierarchical) topology is a combination of:", opts:["Bus and ring","Star topologies connected hierarchically","Mesh and bus","Ring and star"], ans:1, exp:"Tree topology cascades star networks in a hierarchy, commonly seen in enterprise LAN design.", topic:TOPICS.TOPO},
+{q:"Which topology was used by early Ethernet (coaxial cable)?", opts:["Star","Ring","Bus","Mesh"], ans:2, exp:"Early 10BASE2/10BASE5 Ethernet used bus topology with coaxial cable.", topic:TOPICS.TOPO},
+{q:"Token Ring used which physical topology while logically operating as a ring?", opts:["Bus","Star (wiring hub/MAU)","Mesh","Tree"], ans:1, exp:"Token Ring used a MAU (Multistation Access Unit) creating a physical star wiring while logically operating as a ring.", topic:TOPICS.TOPO},
+{q:"In a full mesh network with N nodes, how many connections are required?", opts:["N","N-1","N(N-1)/2","N²"], ans:2, exp:"Full mesh connections = N(N-1)/2. For 5 nodes: 5×4/2 = 10 connections.", topic:TOPICS.TOPO},
+{q:"Which topology is most common in modern wired LAN deployments?", opts:["Bus","Ring","Star","Mesh"], ans:2, exp:"Modern LANs overwhelmingly use star topology with a central switch, providing easy management and fault isolation.", topic:TOPICS.TOPO},
+{q:"What is a disadvantage of bus topology?", opts:["Requires many cables","A single break disables the entire network","Expensive central device needed","Hard to add new nodes"], ans:1, exp:"Bus topology's main weakness is that a cable break anywhere disrupts all communication on the bus.", topic:TOPICS.TOPO},
+{q:"The hybrid topology is:", opts:["A combination of two or more topology types","A topology with no central device","A topology using wireless only","A topology for WANs only"], ans:0, exp:"Hybrid topology combines different topologies (e.g., star-bus, star-ring) to leverage advantages of each.", topic:TOPICS.TOPO},
+{q:"Which topology has the highest cabling cost?", opts:["Bus","Star","Ring","Full mesh"], ans:3, exp:"Full mesh is most expensive — N(N-1)/2 connections scale quadratically with the number of nodes.", topic:TOPICS.TOPO},
+{q:"In a point-to-point topology:", opts:["Multiple devices share a link","Exactly two nodes are directly connected","All nodes connect to a central device","Data must traverse all nodes"], ans:1, exp:"Point-to-point is the simplest topology — a dedicated link between exactly two endpoints.", topic:TOPICS.TOPO},
+{q:"A data center spine-leaf architecture is a type of:", opts:["Bus topology","Full mesh between all servers","Two-tier partial mesh (leaf switches connect to all spine switches)","Tree topology"], ans:2, exp:"Spine-leaf is a two-tier architecture where every leaf switch connects to every spine switch, providing consistent low-latency paths.", topic:TOPICS.TOPO},
+{q:"What is the difference between physical and logical topology?", opts:["They are always the same","Physical is the actual cable layout; logical is how data flows","Physical is for LANs; logical is for WANs","Physical uses IP; logical uses MAC"], ans:1, exp:"Physical topology describes the physical arrangement of cables/hardware. Logical topology describes how data traverses the network.", topic:TOPICS.TOPO},
+{q:"Which topology best describes a campus network with multiple star-topology buildings connected to a central core switch?", opts:["Extended star / hierarchical star","Bus","Ring","Full mesh"], ans:0, exp:"Large enterprise networks use extended/hierarchical star with access, distribution, and core layers.", topic:TOPICS.TOPO},
+{q:"Which topology suffers from a single point of failure at the central device?", opts:["Bus","Star","Ring","Mesh"], ans:1, exp:"In star topology, if the central switch/hub fails, all connected devices lose connectivity.", topic:TOPICS.TOPO},
+{q:"In which topology can a failure of one device potentially affect the entire network?", opts:["Mesh","Star","Bus and Ring","Point-to-point"], ans:2, exp:"In both bus and ring topologies, a single point of failure (break/device failure) can disrupt the entire network.", topic:TOPICS.TOPO},
+{q:"What is a dual-ring topology?", opts:["Two independent rings providing redundancy","A ring with two central switches","A ring for IPv4 and a ring for IPv6","A ring topology using two protocols"], ans:0, exp:"Dual-ring (used in FDDI) provides a counter-rotating backup ring, maintaining operation if the primary ring breaks.", topic:TOPICS.TOPO},
+
+// ─────────────── FILE & PRINT SERVICES (100 questions) ───────────────
+{q:"SMB stands for:", opts:["Standard Message Block","Server Message Block","Secure Multiplex Bridge","Shared Media Bandwidth"], ans:1, exp:"SMB (Server Message Block) is the protocol for sharing files, printers, and other resources on Windows networks.", topic:TOPICS.FPS},
+{q:"Which port does SMB use in modern Windows networks?", opts:["139","445","21","137"], ans:1, exp:"Modern SMB uses TCP port 445 directly. Port 139 was used for legacy NetBIOS over TCP/IP.", topic:TOPICS.FPS},
+{q:"FTP stands for:", opts:["Fast Transfer Protocol","File Transfer Protocol","Flexible Transport Protocol","Forwarding and Transfer Procedure"], ans:1, exp:"FTP = File Transfer Protocol — standard protocol for transferring files between client and server.", topic:TOPICS.FPS},
+{q:"FTP uses which two TCP connections?", opts:["Control (21) and Data (20/passive)","Data (80) and Control (443)","Control (20) and Data (21)","Authentication (22) and Data (21)"], ans:0, exp:"FTP uses TCP port 21 for control commands and port 20 (or a dynamic port in passive mode) for data.", topic:TOPICS.FPS},
+{q:"What is SFTP?", opts:["Secure FTP — FTP over SSL","SSH File Transfer Protocol — a completely different protocol using SSH for secure file transfer","Simple FTP — a simplified version","Serial FTP — for COM port file transfer"], ans:1, exp:"SFTP is a subsystem of SSH providing encrypted file transfer — unrelated to FTP despite the name.", topic:TOPICS.FPS},
+{q:"TFTP (Trivial FTP) differs from FTP by:", opts:["Using TCP instead of UDP","Being a simplified protocol with no authentication, using UDP port 69","Supporting more file operations","Providing encryption"], ans:1, exp:"TFTP uses UDP port 69, has no authentication, and supports only basic read/write — used for booting and firmware updates.", topic:TOPICS.FPS},
+{q:"NFS stands for:", opts:["Network File System","New Forwarding Service","Non-Functional Storage","Native File Sharing"], ans:0, exp:"NFS (Network File System) is a distributed file system protocol by Sun Microsystems for Unix/Linux.", topic:TOPICS.FPS},
+{q:"Which protocol does Windows use for printing to network printers?", opts:["LPR/LPD","SMB/IPP","FTP","HTTP"], ans:1, exp:"Windows uses SMB for printer sharing and IPP (Internet Printing Protocol) for modern network printing.", topic:TOPICS.FPS},
+{q:"What is a print spooler?", opts:["A hardware device inside a printer","A software service that queues print jobs for sequential processing","A network cable type","A printer cartridge"], ans:1, exp:"The print spooler (SPOOLING = Simultaneous Peripheral Operations OnLine) queues jobs to allow applications to continue while printing occurs.", topic:TOPICS.FPS},
+{q:"IPP stands for:", opts:["Internet Printing Protocol","IP Print Proxy","Internal Print Permission","Integrated Protocol for Printers"], ans:0, exp:"IPP (Internet Printing Protocol) is the modern web-based printing protocol using HTTP/HTTPS, commonly on port 631.", topic:TOPICS.FPS},
+{q:"What is CIFS?", opts:["Common Internet File System — the public specification of SMB","Cisco Internetwork File Service","Central Internal File Storage","Compressed Internet File Standard"], ans:0, exp:"CIFS is the public specification of SMB, published by Microsoft to enable interoperability across platforms.", topic:TOPICS.FPS},
+{q:"Samba allows:", opts:["Windows to connect to Unix NFS shares","Linux/Unix systems to provide SMB/CIFS file sharing with Windows clients","Printers to connect directly to DNS","FTP encryption"], ans:1, exp:"Samba is an open-source implementation of SMB/CIFS for Unix/Linux, enabling file and print sharing with Windows clients.", topic:TOPICS.FPS},
+{q:"In FTP, 'passive mode' is used to:", opts:["Slow down transfers","Allow clients behind firewalls/NAT to initiate the data connection","Encrypt the transfer","Transfer without authentication"], ans:1, exp:"In passive FTP, the server opens a dynamic port and the client connects to it — solving firewall issues where the server can't initiate to the client.", topic:TOPICS.FPS},
+{q:"What is the purpose of a DFS (Distributed File System)?", opts:["Encrypting files across servers","Presenting multiple file servers as a single logical namespace","Distributing print jobs","Compressing files across a network"], ans:1, exp:"DFS creates a unified namespace spanning multiple file servers, making distributed storage transparent to users.", topic:TOPICS.FPS},
+{q:"Print server pooling allows:", opts:["Multiple jobs to a single printer","A single queue to distribute jobs across multiple identical printers","Printers on different VLANs to share a queue","Printers to work without a server"], ans:1, exp:"Printer pooling distributes print jobs across multiple printers in a pool, reducing wait times.", topic:TOPICS.FPS},
+{q:"FTPS (FTP Secure) differs from SFTP by:", opts:["Using SSH","Adding SSL/TLS encryption to the standard FTP protocol","Being faster","Using UDP instead of TCP"], ans:1, exp:"FTPS adds TLS/SSL encryption to FTP (implicit on port 990, explicit on port 21), while SFTP is a separate SSH-based protocol.", topic:TOPICS.FPS},
+{q:"What is the print queue?", opts:["The physical printer tray","A list of print jobs waiting to be processed","The printer driver","The network path to the printer"], ans:1, exp:"The print queue holds submitted print jobs in order, managed by the print spooler service.", topic:TOPICS.FPS},
+{q:"SMBv3 introduced which major security improvement?", opts:["Server-side encryption","End-to-end encryption of SMB traffic natively","Firewall integration","DNS-based authentication"], ans:1, exp:"SMBv3 (Windows 8/Server 2012) introduced native end-to-end encryption without VPN overhead.", topic:TOPICS.FPS},
+{q:"What is anonymous FTP?", opts:["FTP with no data transfer","FTP allowing login with 'anonymous' as username and email as password, for public downloads","FTP over an encrypted tunnel","FTP with no file listing"], ans:1, exp:"Anonymous FTP allows public access to files using 'anonymous' login — used for public software repositories.", topic:TOPICS.FPS},
+{q:"NFS version 4 improvements over NFSv3 include:", opts:["Switching to UDP","Strong security (RPCSEC_GSS/Kerberos), stateful operation, and unified port 2049","Using SMB protocol","Adding printer support"], ans:1, exp:"NFSv4 added stateful operation, strong security, compound operations, and uses only TCP port 2049.", topic:TOPICS.FPS},
+
+// ─────────────── PATCH MANAGEMENT (100 questions) ───────────────
+{q:"What is patch management?", opts:["Managing network cables","The process of identifying, acquiring, testing, and applying software updates to fix vulnerabilities","Managing IP address assignments","Updating DNS records"], ans:1, exp:"Patch management is the systematic process of applying software patches/updates to fix bugs, security vulnerabilities, and improve functionality.", topic:TOPICS.PATCH},
+{q:"What is a security patch?", opts:["A cable repair kit","A software update specifically designed to fix a security vulnerability","A network configuration backup","A firewall rule set"], ans:1, exp:"Security patches address specific vulnerabilities that could be exploited by attackers.", topic:TOPICS.PATCH},
+{q:"WSUS stands for:", opts:["Windows Software Upgrade System","Windows Server Update Services — Microsoft's internal patch distribution tool","Wireless Security Update Service","Wide-area Software Update System"], ans:1, exp:"WSUS allows administrators to centrally manage and distribute Microsoft updates within an organization.", topic:TOPICS.PATCH},
+{q:"What is a zero-day vulnerability?", opts:["A vulnerability discovered on day one of a product's release","A vulnerability that is publicly known before a patch is available","A vulnerability in legacy software","A vulnerability with no CVSS score"], ans:1, exp:"Zero-day vulnerabilities are unknown to the vendor or unpatched, giving defenders 'zero days' to fix them.", topic:TOPICS.PATCH},
+{q:"The CVSS (Common Vulnerability Scoring System) is used for:", opts:["Distributing patches","Scoring the severity of security vulnerabilities","Managing software licenses","Tracking patch compliance"], ans:1, exp:"CVSS provides a standardized 0-10 score for vulnerability severity, guiding patch prioritization.", topic:TOPICS.PATCH},
+{q:"What is a hotfix?", opts:["A physical cable repair","A small, targeted software update addressing a specific critical issue","A major OS upgrade","A rollback procedure"], ans:1, exp:"A hotfix is a rapid, targeted patch for a specific critical bug, often released outside the regular patch cycle.", topic:TOPICS.PATCH},
+{q:"Patch Tuesday refers to:", opts:["The day patches are tested","Microsoft's practice of releasing security updates on the second Tuesday of each month","The day before deploying patches","A weekly patch review meeting"], ans:1, exp:"Microsoft releases security updates on the second Tuesday of each month — giving administrators a predictable schedule.", topic:TOPICS.PATCH},
+{q:"What is the risk of NOT patching systems promptly?", opts:["Performance improvements delayed","Increased exposure to exploitation of known vulnerabilities","Higher bandwidth usage","DNS resolution failures"], ans:1, exp:"Unpatched systems are vulnerable to exploits. Many major breaches (WannaCry, NotPetya) exploited known, patchable vulnerabilities.", topic:TOPICS.PATCH},
+{q:"A patch management policy should include:", opts:["Only emergency patches","Inventory of assets, vulnerability scanning, patch testing, deployment timeline, and compliance reporting","Patching only servers","Manual patching only"], ans:1, exp:"A comprehensive patch management policy covers: inventory, vulnerability scanning, risk assessment, testing, deployment, and verification.", topic:TOPICS.PATCH},
+{q:"What is a rollback in patch management?", opts:["Applying multiple patches at once","Reverting to the previous state if a patch causes issues","Rolling out patches to all systems simultaneously","Creating a patch distribution schedule"], ans:1, exp:"Rollback reverts systems to a pre-patch state (using snapshots or backup) when a patch causes unexpected problems.", topic:TOPICS.PATCH},
+{q:"Which environment should patches be tested in before production deployment?", opts:["Production directly","A staging/test environment mirroring production","Isolated air-gapped systems only","The vendor's environment"], ans:1, exp:"Patches should be tested in a staging environment that mirrors production to catch compatibility issues before wide deployment.", topic:TOPICS.PATCH},
+{q:"What is an End-of-Life (EOL) system in context of patch management?", opts:["A system that was just deployed","A system the vendor no longer supports or provides patches for","A system in the test environment","A system with the latest patches"], ans:1, exp:"EOL systems receive no vendor patches, creating permanent security risks. These should be upgraded or isolated.", topic:TOPICS.PATCH},
+{q:"CVE stands for:", opts:["Common Vulnerability Enumeration","Common Vulnerabilities and Exposures — a public list of known security issues","Cyber Vulnerability Exploitation","Centralized Vulnerability Engine"], ans:1, exp:"CVE is a standardized identifier system for publicly known cybersecurity vulnerabilities maintained by MITRE.", topic:TOPICS.PATCH},
+{q:"What is a service pack?", opts:["A collection of individual patches bundled together as a major cumulative update","A single critical security fix","A hardware driver bundle","A configuration backup"], ans:0, exp:"Service packs bundle all patches released since a product shipped (or last service pack) into one cumulative update.", topic:TOPICS.PATCH},
+{q:"Automated patch management tools help by:", opts:["Replacing the need for security teams","Discovering, downloading, testing (in some cases), and deploying patches at scale","Eliminating all vulnerabilities automatically","Replacing antivirus software"], ans:1, exp:"Automated tools (WSUS, SCCM, Ansible, Puppet) scale patch deployment across thousands of systems.", topic:TOPICS.PATCH},
+{q:"What is the 'patch gap'?", opts:["A physical gap in network cabling","The time between a vulnerability being discovered/exploited and a patch being applied","The space between patch releases","A gap in the firewall rules"], ans:1, exp:"The patch gap is the dangerous window between vulnerability disclosure and patch deployment — attackers exploit this window.", topic:TOPICS.PATCH},
+{q:"Which of these is NOT a best practice in patch management?", opts:["Maintaining an asset inventory","Applying patches immediately to production without testing","Testing patches in staging first","Documenting patch deployment"], ans:1, exp:"Patches should NEVER go directly to production without testing — they can break critical applications.", topic:TOPICS.PATCH},
+{q:"NVD stands for:", opts:["Network Vulnerability Database","National Vulnerability Database — maintained by NIST","Null Vulnerability Detection","Node Vulnerability Discovery"], ans:1, exp:"NIST's NVD (National Vulnerability Database) enriches CVE entries with CVSS scores and additional analysis.", topic:TOPICS.PATCH},
+{q:"Compensating controls in patch management are used when:", opts:["Patches are easy to deploy","Patching is not immediately possible — alternative mitigations reduce risk","All patches have been applied","The system is in a test environment"], ans:1, exp:"When patching is impossible (EOL, operational constraints), compensating controls (network segmentation, WAF, monitoring) reduce exposure.", topic:TOPICS.PATCH},
+{q:"What is the first step in a formal patch management process?", opts:["Deploy patches","Test patches","Asset and software inventory","Create rollback plan"], ans:2, exp:"You can't manage what you don't know. Asset inventory identifies all systems and software that need patching.", topic:TOPICS.PATCH},
+
+// ─────────────── SECURITY SERVICES (110 questions) ───────────────
+{q:"A firewall's primary function is:", opts:["Speeding up network traffic","Monitoring and filtering network traffic based on rules","Assigning IP addresses","Resolving domain names"], ans:1, exp:"Firewalls inspect and control traffic based on security rules, allowing or blocking packets.", topic:TOPICS.SEC},
+{q:"IDS stands for:", opts:["Intrusion Detection System","Internet Data Service","Integrated Defense Solution","Internal DNS Server"], ans:0, exp:"IDS monitors network/system activity for malicious events and alerts administrators.", topic:TOPICS.SEC},
+{q:"IPS differs from IDS by:", opts:["Using different hardware","Actively blocking detected threats instead of just alerting","Monitoring only outbound traffic","Running on endpoints only"], ans:1, exp:"IPS (Intrusion Prevention System) actively blocks malicious traffic inline; IDS only detects and alerts.", topic:TOPICS.SEC},
+{q:"What is a DMZ in network security?", opts:["A zone with no security","A network segment between the internet and internal LAN that hosts public-facing services","A type of VPN","A firewall rule set"], ans:1, exp:"A DMZ (Demilitarized Zone) isolates public-facing servers (web, email, DNS) from the internal network.", topic:TOPICS.SEC},
+{q:"VPN stands for:", opts:["Virtual Private Network","Variable Protocol Negotiation","Verified Public Node","Virtual Processing Network"], ans:0, exp:"VPN creates an encrypted tunnel over a public network, enabling secure remote access.", topic:TOPICS.SEC},
+{q:"What is SSL/TLS used for?", opts:["IP address assignment","Encrypting data in transit between client and server","File compression","Routing decisions"], ans:1, exp:"SSL/TLS provides authentication and encryption for data in transit (HTTPS, SMTP, etc.).", topic:TOPICS.SEC},
+{q:"What is a man-in-the-middle (MITM) attack?", opts:["An insider attack","An attack where the attacker secretly intercepts and possibly alters communications between two parties","A physical server attack","A DDoS attack"], ans:1, exp:"MITM attacks intercept communication without either party's knowledge, enabling eavesdropping and data manipulation.", topic:TOPICS.SEC},
+{q:"What is a DDoS attack?", opts:["Distributed Denial of Service — overwhelming a target with traffic from multiple sources","Direct Data over Service","Dynamic Denial of DNS","Distributed DNS over Service"], ans:0, exp:"DDoS floods a target with traffic from distributed sources (often a botnet), exhausting resources.", topic:TOPICS.SEC},
+{q:"NAC stands for:", opts:["Network Access Control — enforcing security policy for devices connecting to the network","Network Address Configuration","Node Authentication Certificate","None of the above"], ans:0, exp:"NAC (Network Access Control) verifies device health and identity before allowing network access.", topic:TOPICS.SEC},
+{q:"What is the principle of least privilege?", opts:["Giving users maximum access","Granting users only the minimum access needed to perform their job","Using weak passwords","Disabling all firewalls"], ans:1, exp:"Least privilege minimizes the attack surface by limiting what each user/process can access.", topic:TOPICS.SEC},
+{q:"A honeypot in network security is:", opts:["A type of firewall","A decoy system designed to attract and trap attackers for analysis","A VPN server","An intrusion prevention system"], ans:1, exp:"Honeypots mimic real systems to detect attacker techniques and distract them from actual assets.", topic:TOPICS.SEC},
+{q:"What is 802.1X?", opts:["A Wi-Fi encryption standard","A port-based network access control standard requiring authentication before LAN/WLAN access","A routing protocol","A VPN standard"], ans:1, exp:"802.1X provides port-based authentication using EAP/RADIUS before a device gets network access.", topic:TOPICS.SEC},
+{q:"WPA3 improves on WPA2 by:", opts:["Using weaker encryption for compatibility","Introducing SAE (Simultaneous Authentication of Equals) for stronger handshake and forward secrecy","Removing the password requirement","Using MD5 hashing"], ans:1, exp:"WPA3 replaces the PSK 4-way handshake with SAE (Dragonfly), preventing offline dictionary attacks.", topic:TOPICS.SEC},
+{q:"What is network segmentation?", opts:["Splitting a network into smaller isolated zones to limit lateral movement and contain breaches","Combining networks into one","Assigning multiple IPs to one host","Encrypting network traffic"], ans:0, exp:"Network segmentation divides a network into zones (VLANs, subnets), containing breaches and limiting attacker movement.", topic:TOPICS.SEC},
+{q:"RADIUS is used for:", opts:["Routing between networks","Centralized authentication, authorization, and accounting (AAA) for network access","File encryption","DNS resolution"], ans:1, exp:"RADIUS (Remote Authentication Dial-In User Service) provides centralized AAA for VPN, Wi-Fi, and network device access.", topic:TOPICS.SEC},
+{q:"What is a zero-trust security model?", opts:["Trust all internal network traffic","Never trust, always verify — no implicit trust for any user or device regardless of location","Trust based on IP address","Trust established at login only"], ans:1, exp:"Zero-trust eliminates the concept of a trusted internal network — every access request must be explicitly verified.", topic:TOPICS.SEC},
+{q:"What does HTTPS provide over HTTP?", opts:["Faster speeds","Encrypted communication using TLS, preventing eavesdropping and MITM attacks","Better caching","Smaller packets"], ans:1, exp:"HTTPS wraps HTTP in TLS, providing confidentiality, integrity, and server authentication.", topic:TOPICS.SEC},
+{q:"What is a botnet?", opts:["A network of printers","A network of compromised computers controlled by an attacker for malicious purposes","A legitimate content delivery network","A secure P2P network"], ans:1, exp:"Botnets are networks of malware-infected devices (bots) controlled by a C&C server, used for DDoS, spam, and theft.", topic:TOPICS.SEC},
+{q:"Public key infrastructure (PKI) uses:", opts:["Only symmetric encryption","Asymmetric encryption with public/private key pairs and digital certificates","Shared secrets only","MAC addresses for authentication"], ans:1, exp:"PKI uses asymmetric cryptography — public keys for encryption/verification, private keys for decryption/signing.", topic:TOPICS.SEC},
+{q:"What is phishing?", opts:["Network packet capture","Social engineering attack using deceptive messages to steal credentials or install malware","A network topology","A port scanning technique"], ans:1, exp:"Phishing tricks users into revealing credentials or executing malware via deceptive emails, SMS, or websites.", topic:TOPICS.SEC},
+
+// ─────────────── NETWORK MANAGEMENT (110 questions) ───────────────
+{q:"SNMP stands for:", opts:["Simple Network Management Protocol","Secure Network Monitoring Procedure","Standard Node Management Protocol","Synchronous Network Messaging Protocol"], ans:0, exp:"SNMP is the standard protocol for monitoring and managing network devices.", topic:TOPICS.MGMT},
+{q:"SNMP uses which UDP ports?", opts:["80 and 443","161 (agent) and 162 (trap)","53 and 67","21 and 22"], ans:1, exp:"SNMP managers poll agents on UDP 161; agents send traps (alerts) to managers on UDP 162.", topic:TOPICS.MGMT},
+{q:"What is an MIB in SNMP?", opts:["Management Information Base — a hierarchical database of managed objects","Maximum Interface Bandwidth","Main Internet Bridge","Monitored IP Block"], ans:0, exp:"The MIB is a structured database defining all the objects that can be monitored/managed on a network device.", topic:TOPICS.MGMT},
+{q:"What is a network baseline?", opts:["The lowest layer of the OSI model","Normal performance metrics measured over time used to detect anomalies","A network security policy","The default gateway address"], ans:1, exp:"A baseline captures normal performance metrics so deviations (potential faults or attacks) can be detected.", topic:TOPICS.MGMT},
+{q:"Syslog is used for:", opts:["Synchronizing system clocks","Centralized logging of system and network device events","Routing protocol updates","DNS zone transfers"], ans:1, exp:"Syslog (UDP/TCP 514) provides a standard way for network devices to send log messages to a central log server.", topic:TOPICS.MGMT},
+{q:"NTP stands for:", opts:["Network Transfer Protocol","Network Time Protocol — synchronizes clocks across network devices","Node Topology Protocol","NAT Translation Procedure"], ans:1, exp:"NTP synchronizes clocks to a reference time source, critical for log correlation and security events.", topic:TOPICS.MGMT},
+{q:"RMON (Remote Network Monitoring) extends SNMP by:", opts:["Adding encryption","Enabling monitoring of traffic statistics at a network segment level, not just device-level","Replacing SNMP traps","Providing video monitoring"], ans:1, exp:"RMON allows analysis of traffic at the segment level (not just interface statistics), supporting proactive monitoring.", topic:TOPICS.MGMT},
+{q:"What is NetFlow?", opts:["A Cisco protocol providing flow-level traffic analytics — IP flows between sources and destinations","A physical cable standard","A routing protocol","A VLAN tagging method"], ans:0, exp:"NetFlow (Cisco) captures metadata about IP conversations (flow records) for traffic analysis and security monitoring.", topic:TOPICS.MGMT},
+{q:"What is the purpose of a network management system (NMS)?", opts:["Replacing routers","Centralized monitoring, configuration, and troubleshooting of network infrastructure","Managing user accounts only","Distributing DHCP leases"], ans:1, exp:"An NMS provides a unified platform for device discovery, performance monitoring, fault management, and configuration.", topic:TOPICS.MGMT},
+{q:"SNMPv3 improves on SNMPv2c by:", opts:["Being faster","Adding authentication (HMAC-MD5/SHA) and encryption (AES/DES) for security","Removing traps","Using TCP instead of UDP"], ans:1, exp:"SNMPv3 adds user-based security: authentication prevents tampering; encryption prevents eavesdropping on management traffic.", topic:TOPICS.MGMT},
+{q:"What does a network packet analyzer (like Wireshark) capture?", opts:["Only SNMP data","Raw packets from the network interface for detailed protocol analysis","Only error messages","Firewall logs"], ans:1, exp:"Packet analyzers capture raw frames/packets, enabling deep inspection of protocols, payloads, and troubleshooting.", topic:TOPICS.MGMT},
+{q:"What is QoS (Quality of Service)?", opts:["A security protocol","Traffic management that prioritizes certain types of traffic to ensure performance","A routing protocol","An email service"], ans:1, exp:"QoS classifies and prioritizes network traffic (e.g., voice over data) to ensure critical applications get needed bandwidth.", topic:TOPICS.MGMT},
+{q:"ITIL Change Management in network administration involves:", opts:["Managing physical hardware changes only","A formal process for requesting, reviewing, approving, and implementing network changes","Automatic network configuration","Emergency patching only"], ans:1, exp:"Change management processes minimize service disruptions from network changes through structured approval workflows.", topic:TOPICS.MGMT},
+{q:"What is network documentation?", opts:["Only physical cable labels","Comprehensive records of network topology, IP addressing, device configurations, and procedures","Log files only","A type of network protocol"], ans:1, exp:"Documentation includes topology diagrams, IP schemas, device inventories, configurations, and runbooks — essential for operations.", topic:TOPICS.MGMT},
+{q:"Bandwidth monitoring tools track:", opts:["Only error rates","The amount of data transferred over network links over time","Physical cable condition","DNS resolution times only"], ans:1, exp:"Bandwidth monitoring tracks utilization on links, identifying congestion, unusual spikes, and capacity planning needs.", topic:TOPICS.MGMT},
+{q:"What is FCAPS in network management?", opts:["A routing protocol","A network management framework: Fault, Configuration, Accounting, Performance, Security","A file compression standard","A cable standard"], ans:1, exp:"FCAPS is the ITU-T network management model covering five functional areas.", topic:TOPICS.MGMT},
+{q:"A configuration management database (CMDB) stores:", opts:["Database passwords","Records of IT assets (CIs) and their relationships for change and incident management","Network traffic logs","DNS zone files"], ans:1, exp:"A CMDB is the central repository of Configuration Items (CIs) — hardware, software, services, and their dependencies.", topic:TOPICS.MGMT},
+{q:"What is SNMP 'polling'?", opts:["Sending alerts when a threshold is exceeded","The NMS periodically querying agents to collect management data","Blocking SNMP traffic","Encrypting SNMP messages"], ans:1, exp:"SNMP polling involves the NMS sending Get/GetBulk requests to agents on a schedule to collect metrics.", topic:TOPICS.MGMT},
+{q:"Syslog severity levels range from:", opts:["0-5","0-7 (Emergency to Debug)","1-10","0-100"], ans:1, exp:"Syslog has 8 severity levels: 0=Emergency, 1=Alert, 2=Critical, 3=Error, 4=Warning, 5=Notice, 6=Informational, 7=Debug.", topic:TOPICS.MGMT},
+{q:"What is a network SLA (Service Level Agreement)?", opts:["A software license agreement","A contract defining expected network performance metrics (uptime, latency, bandwidth)","A security policy document","A hardware warranty"], ans:1, exp:"Network SLAs define measurable commitments: availability (e.g., 99.9% uptime), latency, packet loss, and support response times.", topic:TOPICS.MGMT},
+
+// ─────────────── REAL-WORLD APPLICATION (5%) ───────────────
+{q:"[REAL-WORLD] A university's DHCP server stops responding. Students can still browse the internet from their phones (mobile data) but cannot connect via campus Wi-Fi. Which DHCP message would you look for in packet captures to diagnose the issue?", opts:["DHCPDISCOVER from clients with no DHCPOFFER response","DHCPACK from the server","DHCPNAK only","ARP requests from the server"], ans:0, exp:"When DHCP fails, clients broadcast DISCOVER. If no Offer is received, they fall back to APIPA (169.254.x.x). Capturing Discovers without Offers confirms server unreachability.", topic:TOPICS.REAL},
+{q:"[REAL-WORLD] Users report that navigating to 'bank.example.com' redirects them to a fake page. The real IP should be 203.0.113.10 but DNS is returning 198.51.100.5. What attack is most likely?", opts:["DDoS attack","DNS cache poisoning","ARP spoofing","BGP hijacking"], ans:1, exp:"DNS cache poisoning injects false records, redirecting users to attacker-controlled servers — a classic credential-stealing vector.", topic:TOPICS.REAL},
+{q:"[REAL-WORLD] A network administrator notices the ARP table shows the gateway MAC mapped to an internal workstation's MAC instead of the router's. Users are experiencing slow speeds and credential theft. What is the likely cause?", opts:["A broken switch port","ARP spoofing / ARP poisoning attack enabling MITM","A duplicate IP conflict","A DHCP misconfiguration"], ans:1, exp:"When a workstation's MAC appears for the gateway IP, an attacker is likely poisoning the ARP cache to intercept all traffic.", topic:TOPICS.REAL},
+{q:"[REAL-WORLD] A file server with shared drives is heavily accessed. Users complain that after the evening backup, file access is slow the next morning. Which service would you investigate?", opts:["DNS resolver","Print spooler","SMB file service and backup job scheduling","DHCP lease renewal"], ans:2, exp:"Heavy backup I/O on the file server competes with SMB file requests. Scheduling backups off-hours or using dedicated backup interfaces resolves this.", topic:TOPICS.REAL},
+{q:"[REAL-WORLD] Your company just discovered that a critical web server runs on Windows Server 2008 R2 (now EOL). A new vulnerability affecting it has been published (CVSS score 9.8). You cannot upgrade immediately. What is the BEST immediate compensating control?", opts:["Do nothing until the upgrade is scheduled","Apply network segmentation and WAF rules to reduce exposure while planning urgent upgrade","Delete the server","Disable the network card"], ans:1, exp:"For critical EOL vulnerabilities, compensating controls (isolation, WAF, enhanced monitoring) buy time while an emergency upgrade is planned.", topic:TOPICS.REAL},
+{q:"[REAL-WORLD] A BitTorrent client in a corporate network is generating unusual DNS queries with long random subdomain names (e.g., 'xyz123abc.example.com'). A cybersecurity analyst flags this. What is the likely threat?", opts:["Legitimate P2P DHT traffic","DNS tunneling — using DNS to exfiltrate data or establish C2 communication","NTP synchronization","DHCP renewal broadcast"], ans:1, exp:"DNS tunneling encodes data in DNS queries to exfiltrate data or establish command-and-control bypassing firewalls.", topic:TOPICS.REAL},
+{q:"[REAL-WORLD] After deploying a patch on Tuesday, 30% of machines cannot print. The patch updated a printer driver component. What should the sysadmin do FIRST?", opts:["Uninstall the patch on affected machines (rollback) while investigating","Re-image all affected systems","Ignore it and wait for a follow-up patch","Reinstall all printers manually"], ans:0, exp:"Roll back the problematic patch on affected systems immediately, restoring printing, then investigate the root cause in a test environment.", topic:TOPICS.REAL},
+{q:"[REAL-WORLD] A small ISP uses DHCP to assign addresses to residential customers. Customers call reporting they can't connect after a network outage. Which DHCP timer would explain delayed reconnection if the server was unreachable during lease renewal?", opts:["T1 (50%) — the initial renewal attempt","The lease expiry — clients lose connectivity only when the lease fully expires","DHCPDISCOVER timeout","DNS TTL expiry"], ans:1, exp:"Clients can continue using their address through T1 and T2 timeouts. They lose connectivity only when the lease fully expires and no renewal succeeded.", topic:TOPICS.REAL},
+{q:"[REAL-WORLD] An organization deploys a star topology with a single core switch. A fiber cut to the core switch takes down the entire network. What topology change would provide resilience?", opts:["Switch to bus topology","Deploy redundant uplinks and a secondary core switch (dual-star / stacked core)","Deploy full mesh between all workstations","Replace Ethernet with Wi-Fi"], ans:1, exp:"Redundant core switches with dual uplinks eliminate the single point of failure in a star topology.", topic:TOPICS.REAL},
+{q:"[REAL-WORLD] A SIEM alerts on a spike in SNMP traffic from an external IP attempting GET requests against all OIDs on your core router. What is this likely?", opts:["A legitimate network management poll","An SNMP enumeration/reconnaissance attack gathering device info","A DDoS attack","A DNS query flood"], ans:1, exp:"SNMP enumeration from external IPs harvests device information (interfaces, routes, community strings) for attack planning. SNMPv1/v2c community strings exposed externally are a critical risk.", topic:TOPICS.REAL},
+{q:"[REAL-WORLD] Users report intermittent 'IP address conflict' warnings. Network monitoring shows two devices with the same IP. What protocol detects and handles this in real time?", opts:["DNS","Gratuitous ARP — when a device claims an IP, others with that IP detect the conflict","DHCP — the server detects via ping before assignment","SNMP trap from the switch"], ans:1, exp:"Gratuitous ARP is used by hosts on network join to announce their IP. If another host with the same IP responds, a conflict is detected.", topic:TOPICS.REAL},
+{q:"[REAL-WORLD] Your company's file share server (SMB) is hit by ransomware that encrypts all shared files. Which patch management failure most directly enabled this?", opts:["DHCP misconfiguration","Unpatched SMB vulnerability (like EternalBlue/MS17-010) allowing remote code execution","DNS cache poisoning","FTP misconfiguration"], ans:1, exp:"WannaCry and NotPetya used EternalBlue (MS17-010 SMB vulnerability). Organizations that hadn't applied the March 2017 patch were devastated.", topic:TOPICS.REAL},
+{q:"[REAL-WORLD] A DHCP server log shows 10,000 DHCPDISCOVER requests in 60 seconds from different MAC addresses, causing pool exhaustion. What attack is this?", opts:["ARP storm","DNS amplification","DHCP starvation attack — flooding DISCOVER with spoofed MACs","P2P traffic spike"], ans:2, exp:"DHCP starvation uses tools like Yersinia to send thousands of DISCOVERs with fake MACs, exhausting the pool and enabling a rogue DHCP server.", topic:TOPICS.REAL},
+{q:"[REAL-WORLD] During a P2P file-sharing audit, you find that employees are downloading files from BitTorrent. Beyond policy violation, what specific network and security risks does this create?", opts:["Only wasted bandwidth","Bandwidth exhaustion, malware distribution via torrents, legal liability, and P2P DHT traffic enabling network reconnaissance","Only legal risk","Only DNS pollution"], ans:1, exp:"Corporate P2P risks: bandwidth saturation, malware in downloaded files, copyright liability, and DHT/tracker traffic that complicates security monitoring.", topic:TOPICS.REAL},
+{q:"[REAL-WORLD] You are designing network services for a new branch office with 50 users. What combination of services would you deploy at minimum?", opts:["DNS only","DHCP for automatic IP assignment, DNS for name resolution, a local file server (SMB/NFS), and patch management integration","Static IPs for all devices only","Just a router and internet access"], ans:1, exp:"A branch office needs: DHCP (automatic addressing), DNS (name resolution), file services (SMB/NFS), print services, and integrated patch management — the core of this course.", topic:TOPICS.REAL},
+
+// ── Extra DNS fill ──
+{q:"What is split-horizon DNS?", opts:["DNS that operates in two hemispheres","Serving different DNS responses to internal vs external clients","A DNS backup strategy","A DNS load balancing technique"], ans:1, exp:"Split-horizon (split-brain) DNS returns different records to internal users (private IPs) vs external (public IPs).", topic:TOPICS.DNS},
+{q:"In which layer of the DNS hierarchy do organizations like 'google.com' reside?", opts:["Root","Top-level domain","Second-level domain","Third-level domain"], ans:2, exp:"'google.com' is a second-level domain — below the .com TLD.", topic:TOPICS.DNS},
+{q:"What is DNS over HTTPS (DoH)?", opts:["DNS using HTTP for zone transfers","DNS queries encrypted using HTTPS to prevent eavesdropping and tampering","A type of DNS server","DNS using HTTP compression"], ans:1, exp:"DoH encrypts DNS queries using HTTPS (port 443), preventing ISPs and attackers from seeing what domains you resolve.", topic:TOPICS.DNS},
+{q:"What is a DNS stub resolver?", opts:["A full recursive resolver","A minimal resolver that forwards queries to a recursive resolver","A root name server","A DNSSEC validator"], ans:1, exp:"Stub resolvers (in OS) do minimal processing and forward queries to the configured recursive resolver (e.g., 8.8.8.8).", topic:TOPICS.DNS},
+{q:"The HOSTS.TXT approach was abandoned because:", opts:["It was too secure","It didn't scale — frequent updates, central point of failure, no hierarchy","It was too slow","It required too much memory"], ans:1, exp:"With thousands of hosts, HOSTS.TXT was impractical — slow to update, no hierarchy, and a single point of administration.", topic:TOPICS.DNS},
+
+// ── Extra ARP fill ──
+{q:"Which Ethernet frame type does ARP use?", opts:["0x0800 (IPv4)","0x0806 (ARP)","0x86DD (IPv6)","0x8100 (VLAN)"], ans:1, exp:"ARP uses EtherType 0x0806, while IPv4 is 0x0800 and IPv6 is 0x86DD.", topic:TOPICS.ARP},
+{q:"What is the hardware length field in ARP for Ethernet?", opts:["4 bytes","6 bytes","2 bytes","8 bytes"], ans:1, exp:"Ethernet MAC addresses are 6 bytes (48 bits), so the hardware address length field in ARP is 6.", topic:TOPICS.ARP},
+{q:"ARP entries for a device's own IP and MAC are called:", opts:["Static entries","Self entries","Local entries","ARP does not cache own entries"], ans:3, exp:"ARP caches entries for OTHER hosts. Your own IP-MAC mapping doesn't need to be in the ARP cache.", topic:TOPICS.ARP},
+{q:"Which tool can be used to detect ARP spoofing?", opts:["nslookup","arpwatch","tcpdump only","dig"], ans:1, exp:"arpwatch monitors the ARP traffic and logs/alerts on IP-MAC binding changes, indicating potential spoofing.", topic:TOPICS.ARP},
+{q:"In IPv6, the equivalent of ARP's 'Who has IP X?' is:", opts:["ICMPv6 Router Solicitation","ICMPv6 Neighbor Solicitation","DHCPv6 Discover","ICMPv6 Echo Request"], ans:1, exp:"IPv6 NDP uses ICMPv6 Neighbor Solicitation (type 135) to ask 'who has this IPv6 address?' — replacing ARP.", topic:TOPICS.ARP},
+
+// ── Extra DHCP fill ──
+{q:"DHCP option 15 provides:", opts:["DNS server","Default gateway","Domain name for DNS resolution","NTP server"], ans:2, exp:"DHCP option 15 provides the domain name (e.g., 'example.com') appended for DNS searches.", topic:TOPICS.DHCP},
+{q:"A DHCP server is configured with exclusions. What does an exclusion do?", opts:["Removes old leases","Prevents specific IP addresses within the scope from being assigned","Blocks specific clients","Reserves an address for a specific MAC"], ans:1, exp:"Exclusions remove specific IPs from the dynamic pool — used for statically-assigned devices within the scope range.", topic:TOPICS.DHCP},
+{q:"In DHCP, the DORA process completes when:", opts:["The client receives DHCPOFFER","The client sends DHCPREQUEST","The client receives DHCPACK and configures its interface","The server sends DHCPNAK"], ans:2, exp:"DORA is complete when the client receives DHCPACK, confirming the lease, and configures its network interface.", topic:TOPICS.DHCP},
+{q:"What is the DHCP 'lease renewal' phase called?", opts:["DORA","DHCPREQUEST unicast to the original server at T1","DHCPDISCOVER broadcast at T2","DHCPACK from any server"], ans:1, exp:"At T1 (50% of lease), the client unicasts a DHCPREQUEST to the original server to renew its lease.", topic:TOPICS.DHCP},
+{q:"Which RFC defines DHCPv4?", opts:["RFC 791","RFC 826","RFC 2131","RFC 1918"], ans:2, exp:"DHCP is defined in RFC 2131 (1997), extending RFC 1541.", topic:TOPICS.DHCP},
+
+// ── Extra P2P fill ──
+{q:"In BitTorrent, what is an 'info hash'?", opts:["The MD5 of the .torrent file","SHA-1 hash of the torrent's info dictionary uniquely identifying the torrent","AES encryption key","Tracker authentication token"], ans:1, exp:"The info hash is the SHA-1 of the torrent's info dictionary — used as a global unique identifier for the content.", topic:TOPICS.P2P},
+{q:"What is 'NAT traversal' in P2P?", opts:["Bypassing network security","Techniques allowing peers behind NAT/firewalls to establish direct connections","Encrypting P2P traffic","Routing P2P through VPN"], ans:1, exp:"NAT traversal (STUN, TURN, hole punching) enables P2P direct connections despite NAT, which would otherwise block incoming connections.", topic:TOPICS.P2P},
+{q:"P2P networks were originally associated with which controversy?", opts:["VPN bypassing","Copyright infringement via music/movie sharing (Napster, KaZaA, LimeWire)","Spam email","DDoS attacks"], ans:1, exp:"Early P2P (Napster, KaZaA) enabled widespread copyright infringement, leading to major legal battles.", topic:TOPICS.P2P},
+{q:"What is a private BitTorrent tracker?", opts:["A tracker on a private IP","A restricted tracker requiring registration and maintaining upload/download ratios","A tracker for internal company file sharing","A tracker that doesn't log IPs"], ans:1, exp:"Private trackers enforce ratio rules (upload as much as you download), ensuring content availability.", topic:TOPICS.P2P},
+{q:"WebRTC is a P2P technology primarily used for:", opts:["File sharing","Real-time browser-to-browser audio/video communication without plugins","DNS resolution","DHCP configuration"], ans:1, exp:"WebRTC enables direct peer-to-peer audio, video, and data channels between browsers using ICE/STUN/TURN.", topic:TOPICS.P2P},
+
+// ── Extra Topology fill ──
+{q:"Which topology is used by the SONET/SDH fiber ring backbone?", opts:["Bus","Star","Ring","Mesh"], ans:2, exp:"SONET/SDH uses a ring topology with automatic protection switching (APS) for sub-50ms failover.", topic:TOPICS.TOPO},
+{q:"A 'fat tree' topology is commonly used in:", opts:["Home networks","High-performance data center networks for non-blocking bandwidth","Wide area networks","Ring topologies"], ans:1, exp:"Fat-tree provides equal bandwidth at every layer, making it ideal for high-performance computing and data center fabrics.", topic:TOPICS.TOPO},
+{q:"What is a single point of failure (SPOF)?", opts:["A component that automatically redirects traffic","A component whose failure causes the entire system or service to fail","A redundant device","A load balancer"], ans:1, exp:"SPOFs are critical vulnerabilities — removing them through redundancy is a key goal of resilient network design.", topic:TOPICS.TOPO},
+{q:"In which topology does each node connect to exactly two other nodes?", opts:["Star","Bus","Ring","Mesh"], ans:2, exp:"In a ring topology, each node connects to exactly two neighbors, forming a continuous loop.", topic:TOPICS.TOPO},
+{q:"VPLS (Virtual Private LAN Service) creates:", opts:["A virtual ring topology","An Ethernet-based L2 VPN making geographically separated sites appear as one LAN","A dedicated fiber ring","A wireless mesh"], ans:1, exp:"VPLS extends Ethernet segments over an MPLS/IP WAN, creating a logical bus/LAN across distributed sites.", topic:TOPICS.TOPO},
+
+// ── Extra Security fill ──
+{q:"What is port scanning?", opts:["Physically scanning cable ports","Using tools to discover open network ports and services on target systems","A type of DDoS","Encrypting ports"], ans:1, exp:"Port scanning (nmap, masscan) identifies open ports and running services — used for both security auditing and reconnaissance.", topic:TOPICS.SEC},
+{q:"ACL stands for:", opts:["Automatic Configuration List","Access Control List — rules controlling which traffic is allowed or denied","Application Communication Layer","Advanced Cryptography Library"], ans:1, exp:"ACLs define permit/deny rules applied to network interfaces or firewall policies.", topic:TOPICS.SEC},
+{q:"What is a VLAN (Virtual LAN)?", opts:["A wireless LAN","A logical network segment created on switches, isolating traffic without physical separation","A VPN type","A DNS security extension"], ans:1, exp:"VLANs logically segment networks on shared physical infrastructure, improving security and reducing broadcast domains.", topic:TOPICS.SEC},
+{q:"Two-factor authentication (2FA) requires:", opts:["Two passwords","Something you know + something you have (or are)","Two usernames","A hardware token only"], ans:1, exp:"2FA combines two authentication factors: knowledge (password), possession (OTP token), or inherence (biometric).", topic:TOPICS.SEC},
+{q:"A SQL injection attack targets:", opts:["Network infrastructure","Web application database queries by injecting malicious SQL code","DNS servers","DHCP servers"], ans:1, exp:"SQL injection exploits unsanitized user input in web applications to manipulate database queries.", topic:TOPICS.SEC},
+
+// ── Extra Management fill ──
+{q:"What is IPAM?", opts:["Internet Protocol Address Management — tools for tracking IP address allocation","IP Authentication Module","Internal Port Access Management","IP Aggregation Module"], ans:0, exp:"IPAM provides centralized management of IP address spaces, DHCP scopes, and DNS records — critical for large networks.", topic:TOPICS.MGMT},
+{q:"What is network redundancy?", opts:["Keeping extra network equipment in storage","Having multiple paths or devices so failure of one doesn't disrupt service","Adding extra VLANs","Duplicating all DNS records"], ans:1, exp:"Redundancy provides failover paths/devices so a single failure doesn't cause outages.", topic:TOPICS.MGMT},
+{q:"Configuration drift occurs when:", opts:["Network equipment is upgraded","Device configurations deviate from the approved baseline over time due to untracked changes","DNS TTL values decrease","DHCP leases expire"], ans:1, exp:"Configuration drift happens when ad-hoc changes accumulate, creating inconsistent, potentially insecure configurations.", topic:TOPICS.MGMT},
+{q:"What is a network topology diagram?", opts:["A chart of network users","A visual representation of network devices and their interconnections","A routing table printout","A DHCP scope layout"], ans:1, exp:"Topology diagrams (logical and physical) document device placement, connections, and addressing — essential for operations and troubleshooting.", topic:TOPICS.MGMT},
+{q:"What is ITIL?", opts:["An internet traffic protocol","IT Infrastructure Library — a framework of best practices for IT service management","A routing protocol","An intrusion testing framework"], ans:1, exp:"ITIL provides best practice guidance for IT service management processes including change, incident, problem, and configuration management.", topic:TOPICS.MGMT},
+];
+
+// ════════════════════════════════════════════════════════════════
+//  EXAM STATE
+// ════════════════════════════════════════════════════════════════
+let state = {
+  seed: 0,
+  rng: null,
+  questions: [],       // shuffled subset with shuffled options
+  answers: [],         // selected option index per question (-1 = unanswered)
+  current: 0,
+  timer: null,
+  timeLeft: 3600,
+  totalTime: 3600,
+  startTime: 0,
+  studentName: '',
+  matricNo: '',
+};
+
+// ════════════════════════════════════════════════════════════════
+//  GENERATE UNIQUE SEED ON LOAD
+// ════════════════════════════════════════════════════════════════
+(function() {
+  const seed = generateSeed();
+  document.getElementById('splashSeed').textContent = 'Session Key: ' + seed.toString(16).toUpperCase().padStart(8,'0');
+  state.seed = seed;
+})();
+
+// ════════════════════════════════════════════════════════════════
+//  START EXAM
+// ════════════════════════════════════════════════════════════════
+function startExam() {
+  const name = document.getElementById('studentName').value.trim();
+  const matric = document.getElementById('matricNo').value.trim();
+  if (!name) { alert('Please enter your full name.'); return; }
+  if (!matric) { alert('Please enter your matric number.'); return; }
+
+  state.studentName = name;
+  state.matricNo = matric;
+  state.totalTime = parseInt(document.getElementById('duration').value);
+  state.timeLeft = state.totalTime;
+  const qCount = parseInt(document.getElementById('qCount').value);
+
+  // Cryptographic shuffle using student-specific seed
+  const combSeed = state.seed ^ (name.split('').reduce((a,c,i) => a + c.charCodeAt(0) * (i+1), 0));
+  state.rng = mulberry32(combSeed);
+
+  // Shuffle entire bank
+  let shuffled = seededShuffle(RAW_BANK, state.rng);
+
+  // Ensure real-world questions appear (~5%)
+  const realWorld = shuffled.filter(q => q.topic === TOPICS.REAL);
+  const others = shuffled.filter(q => q.topic !== TOPICS.REAL);
+
+  const realCount = Math.max(1, Math.floor(qCount * 0.05));
+  const otherCount = qCount - realCount;
+
+  const selectedReal = realWorld.slice(0, Math.min(realCount, realWorld.length));
+  const selectedOthers = others.slice(0, Math.min(otherCount, others.length));
+  const combined = seededShuffle([...selectedReal, ...selectedOthers], mulberry32(state.rng()));
+
+  // Shuffle options for each question
+  state.questions = combined.map(q => {
+    const correctText = q.opts[q.ans];
+    const shuffledOpts = seededShuffle([...q.opts], mulberry32(state.rng()));
+    const newAns = shuffledOpts.indexOf(correctText);
+    return { ...q, opts: shuffledOpts, ans: newAns };
+  });
+
+  state.answers = new Array(state.questions.length).fill(-1);
+  state.current = 0;
+  state.startTime = Date.now();
+
+  document.getElementById('topbarName').textContent = name;
+
+  // Build dot grid
+  buildDotGrid();
+
+  showScreen('exam');
+  renderQuestion(0);
+  startTimer();
+  updateStats();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  UI HELPERS
+// ════════════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('shortcutHint').style.display = id === 'exam' ? 'flex' : 'none';
+}
+
+function buildDotGrid() {
+  const grid = document.getElementById('dotGrid');
+  grid.innerHTML = '';
+  state.questions.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    dot.textContent = i + 1;
+    dot.onclick = () => jumpTo(i);
+    dot.id = 'dot_' + i;
+    grid.appendChild(dot);
+  });
+}
+
+function updateDots() {
+  state.questions.forEach((_, i) => {
+    const dot = document.getElementById('dot_' + i);
+    if (!dot) return;
+    dot.className = 'dot' + (i === state.current ? ' current' : (state.answers[i] !== -1 ? ' answered' : ''));
+  });
+  const dot = document.getElementById('dot_' + state.current);
+  if (dot) dot.scrollIntoView({ block: 'nearest' });
+}
+
+function updateStats() {
+  const answered = state.answers.filter(a => a !== -1).length;
+  const remaining = state.questions.length - answered;
+  document.getElementById('nsAnswered').textContent = answered;
+  document.getElementById('nsRemaining').textContent = remaining;
+  const pct = (state.current + 1) / state.questions.length * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+// ════════════════════════════════════════════════════════════════
+//  RENDER QUESTION
+// ════════════════════════════════════════════════════════════════
+function renderQuestion(idx, dir = 1) {
+  const q = state.questions[idx];
+  const area = document.getElementById('questionArea');
+
+  area.innerHTML = `
+    <div class="q-header ${dir >= 0 ? 'q-slide-in' : 'q-slide-back'}">
+      <span class="q-number">Q ${idx + 1} / ${state.questions.length}</span>
+      <span class="q-topic-tag">${q.topic}</span>
+      <div class="q-text">${q.q}</div>
+    </div>
+    <div class="options-list">
+      ${q.opts.map((opt, i) => `
+        <button class="option-btn ${state.answers[idx] === i ? 'selected' : ''}"
+                onclick="selectAnswer(${idx}, ${i})"
+                id="opt_${i}">
+          <span class="option-key">${'ABCD'[i]}</span>
+          <span class="option-text">${opt}</span>
+        </button>
+      `).join('')}
+    </div>
+  `;
+
+  document.getElementById('btnPrev').disabled = idx === 0;
+  document.getElementById('btnNext').textContent = idx === state.questions.length - 1 ? 'Submit Exam' : 'Next →';
+
+  updateDots();
+  updateStats();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  ANSWER SELECTION
+// ════════════════════════════════════════════════════════════════
+function selectAnswer(qIdx, optIdx) {
+  state.answers[qIdx] = optIdx;
+  // Update UI without full re-render
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.toggle('selected', i === optIdx);
+  });
+  updateStats();
+  updateDots();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════════════════════════
+function navigate(dir) {
+  const next = state.current + dir;
+  if (next < 0) return;
+  if (next >= state.questions.length) {
+    showSubmitConfirm();
+    return;
+  }
+  state.current = next;
+  renderQuestion(state.current, dir);
+}
+
+function jumpTo(idx) {
+  const dir = idx > state.current ? 1 : -1;
+  state.current = idx;
+  renderQuestion(idx, dir);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  TIMER
+// ════════════════════════════════════════════════════════════════
+function startTimer() {
+  clearInterval(state.timer);
+  state.timer = setInterval(() => {
+    state.timeLeft--;
+    const mins = Math.floor(state.timeLeft / 60);
+    const secs = state.timeLeft % 60;
+    const display = document.getElementById('timerDisplay');
+    display.textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+    display.classList.toggle('danger', state.timeLeft <= 300);
+    if (state.timeLeft <= 0) {
+      clearInterval(state.timer);
+      submitExam();
+    }
+  }, 1000);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  SUBMIT
+// ════════════════════════════════════════════════════════════════
+function showSubmitConfirm() {
+  const answered = state.answers.filter(a => a !== -1).length;
+  document.getElementById('submitAnswered').textContent = answered;
+  document.getElementById('submitTotal').textContent = state.questions.length;
+  document.getElementById('submitOverlay').classList.add('active');
+}
+
+function hideSubmitConfirm() {
+  document.getElementById('submitOverlay').classList.remove('active');
+}
+
+function submitExam() {
+  clearInterval(state.timer);
+  hideSubmitConfirm();
+
+  const timeUsed = state.totalTime - state.timeLeft;
+  const correct = state.questions.filter((q, i) => state.answers[i] === q.ans).length;
+  const wrong = state.questions.filter((q, i) => state.answers[i] !== -1 && state.answers[i] !== q.ans).length;
+  const skipped = state.answers.filter(a => a === -1).length;
+  const score = Math.round((correct / state.questions.length) * 100);
+
+  // Score ring animation
+  const circumference = 414.69;
+  const offset = circumference * (1 - score / 100);
+  const circle = document.getElementById('scoreCircle');
+  circle.style.strokeDashoffset = offset;
+  circle.style.stroke = score >= 50 ? 'var(--green)' : 'var(--red)';
+
+  document.getElementById('scoreNum').textContent = score + '%';
+  document.getElementById('rsCorrect').textContent = correct;
+  document.getElementById('rsWrong').textContent = wrong;
+  document.getElementById('rsSkipped').textContent = skipped;
+  const m = Math.floor(timeUsed / 60), s = timeUsed % 60;
+  document.getElementById('rsTime').textContent = `${m}:${String(s).padStart(2,'0')}`;
+
+  const grade = score >= 70 ? 'A' : score >= 60 ? 'B' : score >= 50 ? 'C' : score >= 45 ? 'D' : 'F';
+  const passed = score >= 45;
+  document.getElementById('gradeBadge').textContent = 'Grade ' + grade;
+  document.getElementById('gradeBadge').className = 'grade-badge ' + (passed ? 'pass' : 'fail');
+  document.getElementById('resultTitle').textContent = passed ? '✓ Examination Passed' : '✗ Examination Not Passed';
+  document.getElementById('resultSub').textContent = `${state.studentName} · ${state.matricNo} · ${correct}/${state.questions.length} correct`;
+
+  // Build review
+  buildReview();
+  showScreen('result');
+}
+
+// ════════════════════════════════════════════════════════════════
+//  REVIEW
+// ════════════════════════════════════════════════════════════════
+function buildReview() {
+  const list = document.getElementById('reviewList');
+  list.innerHTML = state.questions.map((q, i) => {
+    const userAns = state.answers[i];
+    const isCorrect = userAns === q.ans;
+    const isSkipped = userAns === -1;
+    const statusClass = isSkipped ? 'skipped' : isCorrect ? 'correct' : 'wrong';
+
+    const opts = q.opts.map((opt, oi) => {
+      let cls = 'neutral';
+      let icon = '○';
+      if (oi === q.ans) { cls = 'correct'; icon = '✓'; }
+      else if (oi === userAns && !isCorrect) { cls = 'wrong'; icon = '✗'; }
+      return `<div class="review-opt ${cls}"><span class="review-opt-icon">${icon}</span><span>${opt}</span></div>`;
+    }).join('');
+
+    return `
+      <div class="review-item" data-status="${statusClass}">
+        <div class="review-q-row">
+          <span class="q-number">${i+1}</span>
+          <span class="q-topic-tag">${q.topic}</span>
+          <div class="review-q-text">${q.q}</div>
+        </div>
+        <div class="review-options">${opts}</div>
+        <div class="review-explanation"><strong>Explanation:</strong> ${q.exp}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function filterReview(type, btn) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.review-item').forEach(item => {
+    const s = item.dataset.status;
+    item.classList.toggle('hidden',
+      type !== 'all' && s !== type
+    );
+  });
+}
+
+function restartExam() {
+  showScreen('splash');
+  document.getElementById('studentName').value = '';
+  document.getElementById('matricNo').value = '';
+  // Generate new seed
+  const seed = generateSeed();
+  document.getElementById('splashSeed').textContent = 'Session Key: ' + seed.toString(16).toUpperCase().padStart(8,'0');
+  state.seed = seed;
+}
+
+// ════════════════════════════════════════════════════════════════
+//  KEYBOARD NAVIGATION
+// ════════════════════════════════════════════════════════════════
+document.addEventListener('keydown', (e) => {
+  // Only active during exam
+  if (!document.getElementById('exam').classList.contains('active')) return;
+  if (document.getElementById('submitOverlay').classList.contains('active')) {
+    if (e.key === 'Escape') hideSubmitConfirm();
+    return;
+  }
+
+  switch(e.key) {
+    case 'ArrowRight':
+    case 'Enter':
+      e.preventDefault();
+      navigate(1);
+      break;
+    case 'ArrowLeft':
+      e.preventDefault();
+      navigate(-1);
+      break;
+    case 'a': case 'A': case '1':
+      e.preventDefault();
+      selectAnswer(state.current, 0);
+      break;
+    case 'b': case 'B': case '2':
+      e.preventDefault();
+      selectAnswer(state.current, 1);
+      break;
+    case 'c': case 'C': case '3':
+      e.preventDefault();
+      selectAnswer(state.current, 2);
+      break;
+    case 'd': case 'D': case '4':
+      e.preventDefault();
+      selectAnswer(state.current, 3);
+      break;
+    case 'Backspace':
+      e.preventDefault();
+      state.answers[state.current] = -1;
+      renderQuestion(state.current, 0);
+      break;
+  }
+});
+</script>
+</body>
+
